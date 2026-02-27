@@ -1,0 +1,21 @@
+# Environment
+.env
+
+# Binary
+event-backend
+*.exe
+
+# Go build cache
+tmp/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+log/
+
+# Uploads
+uploads/

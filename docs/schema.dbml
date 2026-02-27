@@ -1,0 +1,110 @@
+// Enums (stored as integer in DB)
+// ticket_type:         Regular=1, VIP=2, VIPPlus=3
+// event_status:        Draft=1, Published=2, Cancelled=3, Completed=4
+// registration_status: Pending=1, Confirmed=2, Cancelled=3
+
+Table roles {
+  id          uuid        [pk]
+  name        varchar     [unique, not null]
+  created_at  timestamp   [not null]
+  updated_at  timestamp   [not null]
+  deleted_at  timestamp
+  created_by  uuid        [ref: > users.id]
+  updated_by  uuid        [ref: > users.id]
+  deleted_by  uuid        [ref: > users.id]
+}
+
+Table users {
+  id          uuid        [pk]
+  role_id     uuid        [not null, ref: > roles.id]
+  name        varchar     [not null]
+  email       varchar     [unique, not null]
+  password    varchar     [not null]
+  is_active   boolean     [not null, default: true]
+  created_at  timestamp   [not null]
+  updated_at  timestamp   [not null]
+  deleted_at  timestamp
+  created_by  uuid        [ref: > users.id]
+  updated_by  uuid        [ref: > users.id]
+  deleted_by  uuid        [ref: > users.id]
+
+  indexes {
+    role_id [name: 'idx_users_role_id', note: 'Filter by role; FK JOIN']
+  }
+}
+
+Table categories {
+  id          uuid        [pk]
+  name        varchar     [unique, not null]
+  slug        varchar     [unique, not null]
+  created_at  timestamp   [not null]
+  updated_at  timestamp   [not null]
+  deleted_at  timestamp
+  created_by  uuid        [ref: > users.id]
+  updated_by  uuid        [ref: > users.id]
+  deleted_by  uuid        [ref: > users.id]
+}
+
+Table events {
+  id                uuid        [pk]
+  organizer_user_id uuid        [not null, ref: > users.id]
+  category_id       uuid        [not null, ref: > categories.id]
+  title             varchar     [not null]
+  slug              varchar     [unique, not null]
+  description       text
+  location          varchar
+  start_date        timestamp   [not null]
+  end_date          timestamp   [not null]
+  status            integer     [not null, note: '1=Draft, 2=Published, 3=Cancelled, 4=Completed']
+  created_at        timestamp   [not null]
+  updated_at        timestamp   [not null]
+  deleted_at        timestamp
+  created_by        uuid        [ref: > users.id]
+  updated_by        uuid        [ref: > users.id]
+  deleted_by        uuid        [ref: > users.id]
+
+  indexes {
+    (status, start_date)        [name: 'idx_events_status_start_date', note: 'Public listing: published + sort by date']
+    (organizer_user_id, status) [name: 'idx_events_organizer_status',  note: 'Organizer dashboard: own events by status']
+    (category_id, status)       [name: 'idx_events_category_status',   note: 'Filter by category + status']
+  }
+}
+
+Table event_tickets {
+  id               uuid           [pk]
+  event_id         uuid           [not null, ref: > events.id]
+  type             integer        [not null, note: '1=Regular, 2=VIP, 3=VIPPlus']
+  price            decimal(12,2)  [not null]
+  quota            integer        [not null]
+  registered_count integer        [not null, default: 0]
+  created_at       timestamp      [not null]
+  updated_at       timestamp      [not null]
+  deleted_at       timestamp
+  created_by       uuid           [ref: > users.id]
+  updated_by       uuid           [ref: > users.id]
+  deleted_by       uuid           [ref: > users.id]
+
+  indexes {
+    event_id         [name: 'idx_event_tickets_event_id',   note: 'List tickets per event']
+    (event_id, type) [unique, name: 'uq_event_tickets_event_type', note: 'Satu tipe per event']
+  }
+}
+
+Table event_registrations {
+  id              uuid      [pk]
+  user_id         uuid      [not null, ref: > users.id]
+  event_ticket_id uuid      [not null, ref: > event_tickets.id]
+  status          integer   [not null, note: '1=Pending, 2=Confirmed, 3=Cancelled']
+  created_at      timestamp [not null]
+  updated_at      timestamp [not null]
+  deleted_at      timestamp
+  created_by      uuid      [ref: > users.id]
+  updated_by      uuid      [ref: > users.id]
+  deleted_by      uuid      [ref: > users.id]
+
+  indexes {
+    (user_id, event_ticket_id) [unique]
+    (user_id, status)          [name: 'idx_event_registrations_user_status',   note: 'Attendee: my registrations by status']
+    (event_ticket_id, status)  [name: 'idx_event_registrations_ticket_status', note: 'Organizer incoming + quota check']
+  }
+}
