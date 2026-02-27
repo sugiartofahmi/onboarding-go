@@ -128,46 +128,6 @@ Examples:
 
 ---
 
-## Project Structure
-
-```
-event-backend/
-├── entities/                         # GORM entity models (database table definitions)
-│   ├── role_entity.go
-│   ├── user_entity.go
-│   ├── category_entity.go
-│   ├── event_entity.go
-│   ├── event_ticket_entity.go
-│   └── event_registration_entity.go
-├── infrastructure/
-│   ├── config/                       # Environment-based configuration loader
-│   │   ├── config.go
-│   │   ├── app_config.go
-│   │   ├── database_config.go
-│   │   ├── jwt_config.go
-│   │   ├── redis_config.go
-│   │   └── storage_config.go
-│   ├── database/                     # PostgreSQL connection factory (GORM)
-│   │   └── database_factory.go
-│   ├── redis/                        # Redis client with cache and distributed lock
-│   │   ├── factories/
-│   │   ├── interfaces/
-│   │   └── services/
-│   └── utils/                        # Shared utility functions
-├── migration/
-│   ├── migration.go                  # Migration runner (up/down/fresh/create)
-│   └── files/                        # SQL migration files
-│       ├── 000001_create_table_roles.up.sql
-│       ├── 000001_create_table_roles.down.sql
-│       └── ...
-├── .env-example                      # Environment variable template
-├── go.mod
-├── go.sum
-└── main.go                           # Application entry point
-```
-
----
-
 ## Running the Application
 
 **Development (run directly):**
