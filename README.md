@@ -8,10 +8,14 @@ Before getting started, make sure the following tools are installed on your mach
 
 | Tool | Version | Notes |
 |------|---------|-------|
-| [Go](https://go.dev/dl/) | 1.25+ | Required |
-| [PostgreSQL](https://www.postgresql.org/download/) | 14+ | Required |
-| [Redis](https://redis.io/download/) | 7+ | Required |
-| [MinIO](https://min.io/download) | Latest | Optional — for local file storage |
+| [Go](https://go.dev/dl/) | 1.25+ | Required for local setup |
+| [PostgreSQL](https://www.postgresql.org/download/) | 14+ | Required for local setup (provided by Docker) |
+| [Redis](https://redis.io/download/) | 7+ | Required for local setup (provided by Docker) |
+| [MinIO](https://min.io/download) | Latest | Optional for local setup (provided by Docker) |
+| [Docker](https://docs.docker.com/get-docker/) | 20.10+ | Required for Docker setup |
+| [Docker Compose](https://docs.docker.com/compose/install/) | 2.0+ | Required for Docker setup (included with Docker Desktop) |
+
+> **Note:** If you use [Docker Setup](#docker-setup), you do **not** need to install Go, PostgreSQL, Redis, or MinIO on your machine.
 
 ---
 
@@ -61,6 +65,182 @@ go run main.go
 ```
 
 The server will start on the port defined by `APP_PORT` (default: `8080`).
+
+---
+
+## Docker Setup
+
+If you prefer running the application and its dependencies via Docker, follow these steps instead of [Local Setup](#local-setup).
+
+### Compose Files
+
+| File | Environment | Env File | Description |
+|------|-------------|----------|-------------|
+| `docker-compose.yml` | Development | `.env` | All ports exposed to host, hot-reload friendly |
+| `docker-compose.staging.yml` | Staging | `.env.staging` | Internal service ports hidden, `restart: always` |
+| `docker-compose.production.yml` | Production | `.env.production` | Resource limits, logging config, hardened security |
+
+Each compose file reads its environment variables from a **separate env file**. The `--env-file` flag tells Docker Compose which file to use for `${...}` variable substitution in the compose file, and the `env_file` directive inside the compose file injects the same variables into the container.
+
+### Services Overview
+
+| Service | Port (Dev) | Port (Staging) | Port (Production) | Description |
+|---------|------------|----------------|--------------------|-------------|
+| `app` | `8080` | `8081` | `8082` | Go application |
+| `postgres` | `5432` | not exposed | not exposed | PostgreSQL 17 |
+| `redis` | `6379` | not exposed | not exposed | Redis 7 |
+| `minio` | `9000`, `9001` | `9002` (console only) | not exposed | S3-compatible object storage |
+| `minio-setup` | — | — | — | One-time bucket creation |
+
+> **Note:** Ports are different per environment so all three can run simultaneously on the same machine without conflicts.
+
+### Step 1: Configure environment variables
+
+Copy the appropriate example file for your environment:
+
+**Development:**
+
+```bash
+cp .env-example .env
+```
+
+**Staging:**
+
+```bash
+cp .env.staging.example .env.staging
+```
+
+**Production:**
+
+```bash
+cp .env.production.example .env.production
+```
+
+All example files are pre-configured for Docker (hosts point to container service names: `postgres`, `redis`, `minio`). Adjust credentials as needed.
+
+> **Warning:** For staging and production, make sure to set strong values for `DB_PASSWORD`, `JWT_SECRET`, `AWS_S3_ACCESS_KEY`, and `AWS_S3_SECRET_KEY`. The production example leaves these **empty** — they must be filled in before starting.
+
+### Step 2: Start all services
+
+**Development:**
+
+```bash
+docker compose -f docker-compose.yml up -d
+```
+
+**Staging:**
+
+```bash
+docker compose --env-file .env.staging -f docker-compose.staging.yml up -d
+```
+
+**Production:**
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml up -d
+```
+
+To rebuild the application image (after code changes), add `--build`:
+
+```bash
+docker compose -f docker-compose.yml up -d --build
+```
+
+> **Note:** Development does not need `--env-file` because Docker Compose automatically reads `.env` from the project root.
+
+### Step 3: Run database migrations
+
+**Development:**
+
+```bash
+docker compose -f docker-compose.yml exec app ./event-backend --migration=true --exec=up
+```
+
+**Staging:**
+
+```bash
+docker compose --env-file .env.staging -f docker-compose.staging.yml exec app ./event-backend --migration=true --exec=up
+```
+
+**Production:**
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml exec app ./event-backend --migration=true --exec=up
+```
+
+### Step 4: Run database seeders (optional)
+
+```bash
+docker compose -f docker-compose.yml exec app ./event-backend --dbseed=true
+```
+
+### Step 5: Verify
+
+Check application logs:
+
+```bash
+docker compose -f docker-compose.yml logs -f app
+```
+
+| Environment | API | MinIO Console |
+|-------------|-----|---------------|
+| Development | [http://localhost:8080](http://localhost:8080) | [http://localhost:9001](http://localhost:9001) |
+| Staging | [http://localhost:8081](http://localhost:8081) | [http://localhost:9002](http://localhost:9002) |
+| Production | [http://localhost:8082](http://localhost:8082) | not exposed |
+
+MinIO Console credentials (dev/staging): `minioadmin` / `minioadmin`
+
+### Common Docker Commands
+
+The table below shows **development** commands. For staging or production, add `--env-file` and swap the compose file:
+
+```bash
+# Staging pattern
+docker compose --env-file .env.staging -f docker-compose.staging.yml <command>
+
+# Production pattern
+docker compose --env-file .env.production -f docker-compose.production.yml <command>
+```
+
+| Command | Description |
+|---------|-------------|
+| `docker compose -f docker-compose.yml up -d` | Start all services in background |
+| `docker compose -f docker-compose.yml up -d --build` | Rebuild image and start all services |
+| `docker compose -f docker-compose.yml down` | Stop all services |
+| `docker compose -f docker-compose.yml down -v` | Stop all services and remove volumes (reset data) |
+| `docker compose -f docker-compose.yml ps` | Show status of all services |
+| `docker compose -f docker-compose.yml logs -f app` | Follow application logs |
+| `docker compose -f docker-compose.yml logs -f postgres` | Follow database logs |
+| `docker compose -f docker-compose.yml restart app` | Restart only the application |
+| `docker compose -f docker-compose.yml exec app ./event-backend --migration=true --exec=up` | Run migrations |
+| `docker compose -f docker-compose.yml exec app ./event-backend --migration=true --exec=down` | Rollback last migration |
+| `docker compose -f docker-compose.yml exec app ./event-backend --migration=true --exec=fresh` | Fresh migration (drop all + re-apply) |
+| `docker compose -f docker-compose.yml exec app ./event-backend --dbseed=true` | Run all seeders |
+| `docker compose -f docker-compose.yml exec app ./event-backend --dbseed=true --class=RoleSeeder` | Run specific seeder |
+
+### Environment Files
+
+| File | Example File | Git Tracked | Description |
+|------|-------------|-------------|-------------|
+| `.env` | `.env-example` | No | Development environment variables |
+| `.env.staging` | `.env.staging.example` | No | Staging environment variables |
+| `.env.production` | `.env.production.example` | No | Production environment variables |
+
+### Environment Differences
+
+| Feature | Development | Staging | Production |
+|---------|-------------|---------|------------|
+| `APP_ENV` | `development` | `release` | `release` |
+| Restart policy | `unless-stopped` | `always` | `always` |
+| Internal ports exposed | Yes | No | No |
+| Resource limits | No | No | Yes |
+| Log rotation | No | No | Yes (`10m`, 3 files) |
+| Redis `maxmemory` | Default | Default | `200mb` (LRU eviction) |
+| MinIO public access | Bucket set to download | Bucket set to download | No public access |
+| DB pool (idle/open) | 5 / 10 | 5 / 10 | 10 / 25 |
+| `DB_PASSWORD` | `test` | `test` | **Required** (empty) |
+| `JWT_SECRET` | `change-me-...` | `change-me-...` | **Required** (empty) |
+| `AWS_S3_ACCESS_KEY` | `minioadmin` | `minioadmin` | **Required** (empty) |
 
 ---
 

@@ -1,5 +1,7 @@
 # Environment
 .env
+.env.staging
+.env.production
 
 # Binary
 event-backend

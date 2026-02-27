@@ -1,0 +1,34 @@
+# Binary
+event-backend
+*.exe
+
+# Environment
+.env
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Docs
+docs/
+README.md
+
+# Logs
+*.log
+log/
+
+# Uploads
+uploads/
+
+# Go build cache
+tmp/
