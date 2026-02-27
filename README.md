@@ -82,6 +82,28 @@ If you prefer running the application and its dependencies via Docker, follow th
 
 Each compose file reads its environment variables from a **separate env file**. The `--env-file` flag tells Docker Compose which file to use for `${...}` variable substitution in the compose file, and the `env_file` directive inside the compose file injects the same variables into the container.
 
+### Variable Substitution vs `env_file`
+
+Docker Compose uses two different mechanisms for environment variables:
+
+| Mechanism | Purpose |
+|-----------|---------|
+| `--env-file` flag | Provides values for `${...}` substitution **when parsing** the compose file |
+| `env_file` directive | Injects variables **into the container** at runtime |
+
+```yaml
+# The --env-file flag supplies values for ${DB_PASSWORD:-test} during compose parsing
+# docker compose --env-file .env.staging -f docker-compose.staging.yml up
+
+# The env_file directive injects .env.staging into the container
+services:
+  app:
+    env_file:
+      - .env.staging
+```
+
+Both point to the same file — this is intentional and correct.
+
 ### Services Overview
 
 | Service | Port (Dev) | Port (Staging) | Port (Production) | Description |
