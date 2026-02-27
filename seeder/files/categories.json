@@ -1,0 +1,10 @@
+[
+    { "name": "Music",       "slug": "music" },
+    { "name": "Technology",  "slug": "technology" },
+    { "name": "Sports",      "slug": "sports" },
+    { "name": "Food & Drink","slug": "food-drink" },
+    { "name": "Arts",        "slug": "arts" },
+    { "name": "Business",    "slug": "business" },
+    { "name": "Education",   "slug": "education" },
+    { "name": "Health",      "slug": "health" }
+]

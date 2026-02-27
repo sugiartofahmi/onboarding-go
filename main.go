@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -16,9 +17,10 @@ import (
 	"event-backend/infrastructure/config"
 	"event-backend/infrastructure/database"
 	redisFactory "event-backend/infrastructure/redis/factories"
-	"event-backend/migration"
 	redisInterfaces "event-backend/infrastructure/redis/interfaces"
 	redisServices "event-backend/infrastructure/redis/services"
+	"event-backend/migration"
+	"event-backend/seeder"
 )
 
 var (
@@ -29,6 +31,8 @@ var (
 	execMigration     *string
 	runMigration      *string
 	migrationFileName *string
+	runSeeder         *string
+	seederClass       *string
 )
 
 func main() {
@@ -50,12 +54,24 @@ func extractArgs() {
 	execMigration = flag.String("exec", "up", "--exec [up/down/fresh/create]")
 	runMigration = flag.String("migration", "false", "--migration [true/false]")
 	migrationFileName = flag.String("fileName", "", "--fileName <name>")
+	runSeeder = flag.String("dbseed", "false", "--dbseed [true/false]")
+	seederClass = flag.String("class", "", "--class [SeederName,...] (optional)")
 	flag.Parse()
 }
 
 func handleMigrationAndSeeding() {
 	if *runMigration == "true" {
 		migration.Run(db, *execMigration)
+		os.Exit(0)
+	}
+	if *runSeeder == "true" {
+		var classes []string
+		if *seederClass != "" {
+			classes = strings.Split(*seederClass, ",")
+		}
+		if err := seeder.Run(db, classes); err != nil {
+			log.Fatal(err)
+		}
 		os.Exit(0)
 	}
 }
