@@ -16,8 +16,11 @@ Project rules for the event-backend. All contributors must follow these guidelin
 8. [Existence Checks](#8-existence-checks)
 9. [Avoid N+1 Queries](#9-avoid-n1-queries)
 10. [Avoid Monster Functions](#10-avoid-monster-functions)
-11. [Unit Testing](#11-unit-testing)
-12. [Adding a Seeder](#12-adding-a-seeder)
+11. [Transaction Scope](#11-transaction-scope)
+12. [Batch Processing](#12-batch-processing)
+13. [Job Delegation](#13-job-delegation)
+14. [Unit Testing](#14-unit-testing)
+15. [Adding a Seeder](#15-adding-a-seeder)
 
 ---
 
@@ -631,7 +634,238 @@ func (s *EventService) CreateEvent(req CreateEventDTO) error {
 
 ---
 
-## 11. Unit Testing
+## 11. Transaction Scope
+
+Only wrap **write operations** in a transaction. Read operations outside the transaction reduce lock contention and improve performance.
+
+> **When to use Redis lock vs DB transaction:**
+> - **Redis lock:** For race condition on a single resource (e.g., deducting quota, claiming voucher)
+> - **DB transaction:** For atomic multi-write operations (e.g., create order + order items + payment record)
+
+```go
+// Bad: wraps everything in transaction, including reads
+func (s *EventService) CreateRegistration(eventID, userID uuid.UUID) error {
+    return s.db.Transaction(func(tx *gorm.DB) error {
+        event, _ := s.getEventWithLock(tx, eventID)     // read inside tx
+        user, _ := s.getUserWithLock(tx, userID)        // read inside tx
+        
+        if event.Quota <= 0 {
+            return ErrEventFull
+        }
+        
+        reg := &entities.Registration{EventID: eventID, UserID: userID}
+        return tx.Create(reg).Error
+    })
+}
+
+// Good: read outside transaction, only write inside
+func (s *EventService) CreateRegistration(eventID, userID uuid.UUID) error {
+    event, err := s.eventQueryRepo.FindEventByID(eventID)
+    if err != nil {
+        return err
+    }
+    if event.Quota <= 0 {
+        return ErrEventFull
+    }
+    
+    return s.db.Transaction(func(tx *gorm.DB) error {
+        reg := &entities.Registration{EventID: eventID, UserID: userID}
+        return tx.Create(reg).Error
+    })
+}
+```
+
+If you need to read data **inside** the transaction (e.g., for conditional logic based on current state), use Redis distributed lock instead of database row locking:
+
+```go
+func (s *EventService) PurchaseTicket(eventID uuid.UUID, qty int) error {
+    lockKey := fmt.Sprintf("lock:event:%s", eventID)
+    lock, err := s.redisLock.Acquire(lockKey, 10*time.Second)
+    if err != nil {
+        return ErrConcurrentModification
+    }
+    defer lock.Release()  // always release on both success and failure
+    
+    event, err := s.eventQueryRepo.FindEventByID(eventID)
+    if err != nil {
+        return err  // lock still released via defer
+    }
+    
+    if event.Quota < qty {
+        return ErrInsufficientQuota  // lock still released via defer
+    }
+    
+    event.Quota -= qty
+    return s.eventStoreRepo.Update(event)  // lock still released via defer
+}
+```
+
+> **Important:** Always release the lock using `defer lock.Release()` — this ensures the lock is released even when the function returns early due to errors or validation failures. Failure to release causes deadlocks where other requests wait indefinitely.
+
+**Redis lock pattern:**
+
+```go
+type DistributedLock struct {
+    redis *redis.Client
+}
+
+func (l *DistributedLock) Acquire(key string, ttl time.Duration) (*Lock, error) {
+    ok, err := l.redis.SetNX(context.Background(), key, "1", ttl).Result()
+    if err != nil {
+        return nil, err
+    }
+    if !ok {
+        return nil, errors.New("lock not acquired")
+    }
+    return &Lock{key: key, redis: l.redis}, nil
+}
+
+type Lock struct {
+    key   string
+    redis *redis.Client
+}
+
+func (l *Lock) Release() error {
+    return l.redis.Del(context.Background(), l.key).Err()
+}
+```
+
+> Avoid `SELECT ... FOR UPDATE` — it holds database locks longer, blocks concurrent transactions, and reduces scalability. Redis distributed locks release quickly and don't block other DB connections.
+
+---
+
+## 12. Batch Processing
+
+Never fetch all records into memory at once. Use chunked/streaming queries to process large datasets.
+
+```go
+// Bad: loads everything into memory
+func (s *ReportService) GenerateUserReport() ([]UserReportDTO, error) {
+    allUsers, _ := s.userQueryRepo.FindAll()  // memory explosion with 1M users
+    // ...
+}
+
+// Good: process in chunks using cursor-based pagination
+func (s *ReportService) GenerateUserReport() error {
+    const batchSize = 1000
+    lastID := uuid.Nil
+    
+    for {
+        users, err := s.userQueryRepo.FindByIDRange(lastID, batchSize)
+        if err != nil {
+            return err
+        }
+        if len(users) == 0 {
+            break
+        }
+        
+        // process batch
+        for _, user := range users {
+            // ...
+        }
+        
+        lastID = users[len(users)-1].ID
+    }
+    return nil
+}
+```
+
+**Chunked deletion:**
+
+```go
+// Delete in batches to avoid long-running transactions and table locks
+func (s *CleanupService) DeleteOldSessions(olderThan time.Time) error {
+    const batchSize = 500
+    
+    for {
+        var ids []uuid.UUID
+        s.db.Model(&entities.Session{}).
+            Where("created_at < ?", olderThan).
+            Limit(batchSize).
+            Pluck("id", &ids)
+        
+        if len(ids) == 0 {
+            break
+        }
+        
+        s.db.Where("id IN ?", ids).Delete(&entities.Session{})
+    }
+    return nil
+}
+```
+
+---
+
+## 13. Job Delegation
+
+Keep jobs short-lived. Prefer many small jobs over one long-running job. Use queues (Redis, RabbitMQ, or a database-backed job table) to process asynchronously.
+
+```go
+// Bad: single long-running job doing everything
+func (s *EventService) ProcessEventPublish(eventID uuid.UUID) error {
+    // validate → send 10,000 emails → update stats → log analytics
+    // takes 30 minutes → timeout, partial failure
+}
+
+// Good: split into smaller, independent jobs
+func (s *EventService) ProcessEventPublish(eventID uuid.UUID) error {
+    // Job 1: validate (fast, sync)
+    if err := s.validateEvent(eventID); err != nil {
+        return err
+    }
+    
+    // Job 2: queue email notifications (async)
+    s.jobQueue.Enqueue(job.NotificationPayload{
+        Type:    "event_published",
+        EventID: eventID,
+    })
+    
+    // Job 3: queue analytics update (async)
+    s.jobQueue.Enqueue(job.AnalyticsPayload{
+        EventID: eventID,
+    })
+    
+    return nil
+}
+```
+
+**Job retry pattern:**
+
+```go
+type Job struct {
+    ID         uuid.UUID
+    Type       string
+    Payload    []byte
+    Retries    int
+    MaxRetries int
+}
+
+func (s *JobWorker) Process(job Job) error {
+    err := s.doWork(job)
+    if err != nil {
+        if job.Retries < job.MaxRetries {
+            job.Retries++
+            return s.queue.RequeueAfter(job, 30*time.Second)  // retry later
+        }
+        s.notifyFailure(job)  // dead letter queue
+    }
+    return nil
+}
+```
+
+**Why delegate?**
+
+| Concern | Impact |
+|---------|--------|
+| HTTP request timeout | Long jobs get killed by proxy/load balancer |
+| Database locks | Long transactions block other writes |
+| Memory usage | Large datasets exhaust RAM |
+| Debugging | Hard to trace failures in monolithic flows |
+| Scalability | Independent jobs scale horizontally |
+
+---
+
+## 14. Unit Testing
 
 Every file at the domain level (`services/`, `repositories/`) **must** have a corresponding `_test.go` file.
 
@@ -766,7 +1000,7 @@ Test the behaviour, not the implementation. One test per logical outcome, not pe
 
 ---
 
-## 12. Adding a Seeder
+## 15. Adding a Seeder
 
 Seeders live in `seeder/` and populate static/reference data only (roles, categories, lookup tables). Never seed transactional data (events, tickets, registrations).
 
