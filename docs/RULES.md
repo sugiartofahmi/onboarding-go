@@ -1,6 +1,6 @@
-# Coding Standards
+# Rules
 
-Internal coding standards for the event-backend project. All contributors must follow these rules.
+Project rules for the event-backend. All contributors must follow these guidelines.
 
 ---
 
