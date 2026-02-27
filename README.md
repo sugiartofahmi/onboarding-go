@@ -128,6 +128,32 @@ Examples:
 
 ---
 
+## Database Seeder
+
+Seeders populate reference/static data (roles, categories, users) needed for development.
+
+### Seeder Commands
+
+| Command | Description |
+|---------|-------------|
+| `go run main.go --dbseed=true` | Run all seeders (truncates existing data first) |
+| `go run main.go --dbseed=true --class=RoleSeeder` | Run a single seeder by name |
+| `go run main.go --dbseed=true --class=RoleSeeder,CategorySeeder` | Run multiple specific seeders |
+
+> **Warning:** Running without `--class` deletes all rows in `users`, `categories`, and `roles` before re-seeding.
+
+### Available Seeders
+
+| Name | Description |
+|------|-------------|
+| `RoleSeeder` | Inserts Admin, Organizer, Attendee roles |
+| `CategorySeeder` | Inserts 8 default event categories |
+| `UserSeeder` | Inserts one user per role with hashed passwords |
+
+Seed data files live in `seeder/files/*.json`.
+
+---
+
 ## Running the Application
 
 **Development (run directly):**
@@ -155,6 +181,40 @@ go build -o event-backend . && ./event-backend
 ```
 
 The server supports graceful shutdown — it waits up to 5 seconds for in-flight requests to complete when it receives `SIGINT` or `SIGTERM`.
+
+---
+
+## Running Tests
+
+Run the full test suite:
+
+```bash
+go test ./...
+```
+
+Run only domain-layer tests:
+
+```bash
+go test ./app/...
+```
+
+Run with verbose output (shows each test name and result):
+
+```bash
+go test -v ./app/...
+```
+
+Run with coverage report:
+
+```bash
+go test -cover ./app/...
+```
+
+Generate an HTML coverage report:
+
+```bash
+go test -coverprofile=coverage.out ./... && go tool cover -html=coverage.out
+```
 
 ---
 

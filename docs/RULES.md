@@ -16,6 +16,8 @@ Project rules for the event-backend. All contributors must follow these guidelin
 8. [Existence Checks](#8-existence-checks)
 9. [Avoid N+1 Queries](#9-avoid-n1-queries)
 10. [Avoid Monster Functions](#10-avoid-monster-functions)
+11. [Unit Testing](#11-unit-testing)
+12. [Adding a Seeder](#12-adding-a-seeder)
 
 ---
 
@@ -626,3 +628,240 @@ func (s *EventService) CreateEvent(req CreateEventDTO) error {
     return nil
 }
 ```
+
+---
+
+## 11. Unit Testing
+
+Every file at the domain level (`services/`, `repositories/`) **must** have a corresponding `_test.go` file.
+
+### File Naming
+
+| Source file | Test file |
+|-------------|-----------|
+| `user_service.go` | `user_service_test.go` |
+| `event_query_repository.go` | `event_query_repository_test.go` |
+| `auth_service.go` | `auth_service_test.go` |
+
+Test files live in the **same directory** as the source file. Use the external test package variant (`package services_test`) to test through public interfaces only.
+
+### Running Tests
+
+```bash
+# Run all tests
+go test ./...
+
+# Run only domain-layer tests
+go test ./app/...
+
+# With verbose output
+go test -v ./app/...
+
+# With coverage report
+go test -cover ./app/...
+```
+
+### Mocking Dependencies
+
+Interfaces in `interfaces/` serve as mock targets. Generate mocks with `mockgen`:
+
+```bash
+mockgen -source=app/user/interfaces/user_query_repository_interface.go \
+        -destination=app/user/mocks/mock_user_query_repository.go \
+        -package=mocks
+```
+
+Place generated mocks in `app/{domain}/mocks/`.
+
+### Example — Service Unit Test
+
+```go
+// app/user/services/user_service_test.go
+package services_test
+
+import (
+    "context"
+    "errors"
+    "testing"
+
+    "github.com/google/uuid"
+    "go.uber.org/mock/gomock"
+
+    "event-backend/app/user/mocks"
+    "event-backend/app/user/services"
+    "event-backend/entities"
+)
+
+func TestUserService_GetUserByID_Found(t *testing.T) {
+    ctrl := gomock.NewController(t)
+    defer ctrl.Finish()
+
+    mockRepo := mocks.NewMockUserQueryRepositoryInterface(ctrl)
+    svc := services.NewUserService(mockRepo)
+
+    userID := uuid.New()
+    expected := &entities.UserEntity{ID: userID, Name: "John"}
+
+    mockRepo.EXPECT().
+        FindUserByID(userID).
+        Return(expected, nil)
+
+    result, err := svc.GetUserByID(context.Background(), userID)
+    if err != nil {
+        t.Fatalf("expected no error, got %v", err)
+    }
+    if result.ID != userID {
+        t.Errorf("expected ID %v, got %v", userID, result.ID)
+    }
+}
+
+func TestUserService_GetUserByID_NotFound(t *testing.T) {
+    ctrl := gomock.NewController(t)
+    defer ctrl.Finish()
+
+    mockRepo := mocks.NewMockUserQueryRepositoryInterface(ctrl)
+    svc := services.NewUserService(mockRepo)
+
+    mockRepo.EXPECT().
+        FindUserByID(gomock.Any()).
+        Return(nil, nil)
+
+    result, err := svc.GetUserByID(context.Background(), uuid.New())
+    if err != nil {
+        t.Fatalf("expected no error, got %v", err)
+    }
+    if result != nil {
+        t.Error("expected nil result for not-found user")
+    }
+}
+
+func TestUserService_GetUserByID_DBError(t *testing.T) {
+    ctrl := gomock.NewController(t)
+    defer ctrl.Finish()
+
+    mockRepo := mocks.NewMockUserQueryRepositoryInterface(ctrl)
+    svc := services.NewUserService(mockRepo)
+
+    dbErr := errors.New("connection refused")
+    mockRepo.EXPECT().
+        FindUserByID(gomock.Any()).
+        Return(nil, dbErr)
+
+    _, err := svc.GetUserByID(context.Background(), uuid.New())
+    if !errors.Is(err, dbErr) {
+        t.Errorf("expected db error, got %v", err)
+    }
+}
+```
+
+### What to Test
+
+| Layer | What to cover |
+|-------|---------------|
+| Service | Business logic paths — happy path, not found, validation error, dependency error |
+| Repository | Skip DB-dependent tests unless using a test DB; focus on query-building helpers |
+| Utils / helpers | All pure functions must have tests |
+
+Test the behaviour, not the implementation. One test per logical outcome, not per line of code.
+
+---
+
+## 12. Adding a Seeder
+
+Seeders live in `seeder/` and populate static/reference data only (roles, categories, lookup tables). Never seed transactional data (events, tickets, registrations).
+
+### File Structure
+
+```
+seeder/
+  seeder_interface.go       # Seeder interface
+  seeder.go                 # Run() executor
+  role_seeder.go            # one file per entity
+  category_seeder.go
+  user_seeder.go
+  files/
+    roles.json
+    categories.json
+    users.json
+```
+
+### Steps to Add a New Seeder
+
+**1. Create the JSON data file** at `seeder/files/{entity}.json`:
+
+```json
+[
+    { "name": "Draft" },
+    { "name": "Published" },
+    { "name": "Cancelled" }
+]
+```
+
+**2. Create the seeder file** `seeder/{entity}_seeder.go`:
+
+```go
+package seeder
+
+import (
+    "encoding/json"
+    "log"
+    "os"
+
+    "gorm.io/gorm"
+    "event-backend/entities"
+)
+
+type StatusSeeder struct{}
+
+func NewStatusSeeder() *StatusSeeder { return &StatusSeeder{} }
+
+func (s *StatusSeeder) Handle(db *gorm.DB) error {
+    data, err := os.ReadFile("seeder/files/statuses.json")
+    if err != nil {
+        return err
+    }
+
+    var rows []struct {
+        Name string `json:"name"`
+    }
+    if err := json.Unmarshal(data, &rows); err != nil {
+        return err
+    }
+
+    if err := db.Where("1 = 1").Delete(&entities.StatusEntity{}).Error; err != nil {
+        return err
+    }
+
+    for _, row := range rows {
+        if err := db.Create(&entities.StatusEntity{Name: row.Name}).Error; err != nil {
+            return err
+        }
+    }
+
+    log.Printf("StatusSeeder: inserted %d rows", len(rows))
+    return nil
+}
+```
+
+**3. Register the seeder** in `seeder/seeder.go` in both places:
+
+```go
+// in the map (selective mode)
+listSeeders := map[string]Seeder{
+    // ...existing...
+    "StatusSeeder": NewStatusSeeder(),
+}
+
+// in the ordered slice (full mode) — respect FK order
+for _, s := range []Seeder{
+    // ...existing...
+    NewStatusSeeder(),
+} {
+```
+
+### Rules
+
+- Each seeder is idempotent: it deletes its own rows before inserting
+- Execution order matters — insert parent tables before child tables (FK constraints)
+- Use `db.Create()` not raw SQL
+- Data lives in `seeder/files/` as JSON — keep the seeder struct minimal
