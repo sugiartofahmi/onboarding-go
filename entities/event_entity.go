@@ -8,7 +8,7 @@ import (
 )
 
 type EventEntity struct {
-	ID              uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"                                                                                                json:"id"`
+	Id              uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"                                                                                                json:"id"`
 	OrganizerUserID uuid.UUID      `gorm:"type:uuid;not null;index:idx_events_organizer_status,priority:1"                                                                               json:"organizer_user_id"`
 	CategoryID      uuid.UUID      `gorm:"type:uuid;not null;index:idx_events_category_status,priority:1"                                                                                json:"category_id"`
 	Title           string         `gorm:"size:255;not null"                                                                                                                              json:"title"`

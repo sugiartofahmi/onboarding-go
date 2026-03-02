@@ -8,7 +8,7 @@ import (
 )
 
 type UserEntity struct {
-	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"    json:"id"`
+	Id        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"    json:"id"`
 	RoleID    uuid.UUID      `gorm:"type:uuid;not null;index:idx_users_role_id"         json:"role_id"`
 	Name      string         `gorm:"size:255;not null"                                  json:"name"`
 	Email     string         `gorm:"size:255;uniqueIndex;not null"                      json:"email"`

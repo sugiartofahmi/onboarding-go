@@ -8,7 +8,7 @@ import (
 )
 
 type EventRegistrationEntity struct {
-	ID            uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"                                                                                              json:"id"`
+	Id            uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"                                                                                              json:"id"`
 	UserID        uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:uq_event_registrations_user_ticket,priority:1;index:idx_event_registrations_user_status,priority:1"           json:"user_id"`
 	EventTicketID uuid.UUID      `gorm:"type:uuid;not null;uniqueIndex:uq_event_registrations_user_ticket,priority:2;index:idx_event_registrations_ticket_status,priority:1"         json:"event_ticket_id"`
 	Status        int            `gorm:"not null;index:idx_event_registrations_user_status,priority:2;index:idx_event_registrations_ticket_status,priority:2"                        json:"status"`

@@ -23,59 +23,49 @@ import (
 	redisServices "event-backend/infrastructure/redis/services"
 	"event-backend/migration"
 	"event-backend/seeder"
+
+	categoryInterfaces "event-backend/app/category/interfaces"
+	categoryRepositories "event-backend/app/category/repositories"
+	categoryServices "event-backend/app/category/services"
+	categoryControllers "event-backend/presentation/http/category/controllers"
 )
 
 var (
-	router            *gin.Engine
-	db                *gorm.DB
-	redisCache        redisInterfaces.RedisCacheInterface
-	redisLock         redisInterfaces.RedisDistributedLockInterface
-	execMigration     *string
-	runMigration      *string
-	migrationFileName *string
-	runSeeder         *string
-	seederClass       *string
+	router            		*gin.Engine
+	db                		*gorm.DB
+	redisCache        		redisInterfaces.RedisCacheInterface
+	redisLock         		redisInterfaces.RedisDistributedLockInterface
+	execMigration     		*string
+	flagMigration     		*string
+	migrationFileName 		*string
+	runSeeder         		*string
+	flagSeeder        		*string
+	seederClass       		*string
+	categoryQueryRepository categoryInterfaces.CategoryQueryRepositoryInterface
+	categoryStoreRepository categoryInterfaces.CategoryStoreRepositoryInterface
+	categoryService categoryInterfaces.CategoryServiceInterface
 )
 
 func main() {
 	extractArgs()
-	if *runMigration == "true" && *execMigration == "create" {
-		migration.Create(nil, *migrationFileName)
-		os.Exit(0)
-	}
 	initializeDatabase()
-	handleMigrationAndSeeding()
+	runnerMigration()
+	runnerSeeder()
 	initializeRedis()
 	initializeRouter()
 	initializeRepositories()
 	initializeServices()
-	startHttpServer()
+	initializeControllers()
+	initializeHttpServer()
 }
 
 func extractArgs() {
 	execMigration = flag.String("exec", "up", "--exec [up/down/fresh/create]")
-	runMigration = flag.String("migration", "false", "--migration [true/false]")
+	flagMigration = flag.String("migration", "false", "--migration [true/false]")
 	migrationFileName = flag.String("fileName", "", "--fileName <name>")
-	runSeeder = flag.String("dbseed", "false", "--dbseed [true/false]")
+	flagSeeder = flag.String("dbseed", "false", "--dbseed [true/false]")
 	seederClass = flag.String("class", "", "--class [SeederName,...] (optional)")
 	flag.Parse()
-}
-
-func handleMigrationAndSeeding() {
-	if *runMigration == "true" {
-		migration.Run(db, *execMigration)
-		os.Exit(0)
-	}
-	if *runSeeder == "true" {
-		var classes []string
-		if *seederClass != "" {
-			classes = strings.Split(*seederClass, ",")
-		}
-		if err := seeder.Run(db, classes); err != nil {
-			log.Fatal(err)
-		}
-		os.Exit(0)
-	}
 }
 
 func initializeDatabase() {
@@ -97,11 +87,40 @@ func initializeRedis() {
 	log.Println("redis initialized")
 }
 
+
+
+func runnerMigration() {
+	if *flagMigration != "true" {
+		return
+	}
+	if *execMigration == "create" {
+		migration.Create(nil, *migrationFileName)
+		os.Exit(0)
+	}
+	migration.Run(db, *execMigration)
+	os.Exit(0)
+}
+
+func runnerSeeder() {
+	if *flagSeeder != "true" {
+		return
+	}
+	var classes []string
+	if *seederClass != "" {
+		classes = strings.Split(*seederClass, ",")
+	}
+	if err := seeder.Run(db, classes); err != nil {
+		log.Fatal(err)
+	}
+	os.Exit(0)
+}
+
+
 func initializeRouter() {
 	router = gin.New()
 	router.ContextWithFallback = true
 
-	gin.SetMode(config.AppEnv)
+	gin.SetMode(config.AppGinMode)
 
 	corsConfig := cors.Config{
 		AllowOrigins:     []string{"*"},
@@ -117,14 +136,20 @@ func initializeRouter() {
 }
 
 func initializeRepositories() {
-	// akan diisi nanti per domain
+	categoryQueryRepository = categoryRepositories.NewCategoryQueryRepository(db)
+	categoryStoreRepository = categoryRepositories.NewCategoryStoreRepository(db)
 }
 
 func initializeServices() {
-	// akan diisi nanti per domain
+	categoryService = categoryServices.NewCategoryService(categoryQueryRepository, categoryStoreRepository)
 }
 
-func startHttpServer() {
+func initializeControllers() {
+	categoryControllers.NewCategoryController(router, categoryService)
+}
+
+
+func initializeHttpServer() {
 	srv := &http.Server{
 		Addr:    ":" + config.AppPort,
 		Handler: router,
