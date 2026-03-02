@@ -24,6 +24,7 @@ func NewCategoryController(router *gin.Engine, categoryService categoryInterface
 	}
 
 	categoryRoute.GET("", controller.Pagination())
+	categoryRoute.POST("", controller.Create())
 	categoryRoute.GET("/:id", controller.Detail())
 }
 
@@ -49,4 +50,17 @@ func (controller *CategoryController) Detail() gin.HandlerFunc {
 
 		httpContext.JSON(http.StatusOK, response)
 	}
+}
+
+
+func (controller *CategoryController) Create() gin.HandlerFunc {
+    return func(httpContext *gin.Context) {
+        ctx := httpContext.Request.Context()
+        dto := &categoryDtos.CategoryCreateRequestDTO{}
+        httpContext.ShouldBindJSON(dto)
+        result := controller.categoryService.Create(ctx, dto)
+        response := utils.SuccessResponse(http.StatusCreated, categoryDtos.CategoryDetailResponseDtoFromEntity(*result))
+
+		httpContext.JSON(http.StatusCreated, response)
+    }
 }
