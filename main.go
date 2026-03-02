@@ -31,19 +31,19 @@ import (
 )
 
 var (
-	router            		*gin.Engine
-	db                		*gorm.DB
-	redisCache        		redisInterfaces.RedisCacheInterface
-	redisLock         		redisInterfaces.RedisDistributedLockInterface
-	execMigration     		*string
-	flagMigration     		*string
-	migrationFileName 		*string
-	runSeeder         		*string
-	flagSeeder        		*string
-	seederClass       		*string
+	router                  *gin.Engine
+	db                      *gorm.DB
+	redisCache              redisInterfaces.RedisCacheInterface
+	redisLock               redisInterfaces.RedisDistributedLockInterface
+	execMigration           *string
+	flagMigration           *string
+	migrationFileName       *string
+	runSeeder               *string
+	flagSeeder              *string
+	seederClass             *string
 	categoryQueryRepository categoryInterfaces.CategoryQueryRepositoryInterface
 	categoryStoreRepository categoryInterfaces.CategoryStoreRepositoryInterface
-	categoryService categoryInterfaces.CategoryServiceInterface
+	categoryService         categoryInterfaces.CategoryServiceInterface
 )
 
 func main() {
@@ -87,8 +87,6 @@ func initializeRedis() {
 	log.Println("redis initialized")
 }
 
-
-
 func runnerMigration() {
 	if *flagMigration != "true" {
 		return
@@ -114,7 +112,6 @@ func runnerSeeder() {
 	}
 	os.Exit(0)
 }
-
 
 func initializeRouter() {
 	router = gin.New()
@@ -147,7 +144,6 @@ func initializeServices() {
 func initializeControllers() {
 	categoryControllers.NewCategoryController(router, categoryService)
 }
-
 
 func initializeHttpServer() {
 	srv := &http.Server{

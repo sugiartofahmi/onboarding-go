@@ -6,6 +6,6 @@ import (
 )
 
 type RedisDistributedLockInterface interface {
-    Acquire(ctx context.Context, key string, ttl time.Duration) bool
-    Release(ctx context.Context, key string) bool
+	Acquire(ctx context.Context, key string, ttl time.Duration) bool
+	Release(ctx context.Context, key string) bool
 }
