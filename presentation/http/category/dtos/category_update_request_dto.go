@@ -12,7 +12,6 @@ type CategoryUpdateRequestDTO struct {
 	Id uuid.UUID `json:"-"`
 }
 
-
 func (dto *CategoryUpdateRequestDTO) ToEntity(existingEntity *entities.CategoryEntity) *entities.CategoryEntity {
 	existingEntity.Name = dto.Name
 	existingEntity.Slug = utils.GenerateSlug(dto.Name)

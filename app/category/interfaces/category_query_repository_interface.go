@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 
-	categorydtos "event-backend/app/category/dtos"
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
+	categorydtos "event-backend/presentation/http/category/dtos"
 )
 
 type CategoryQueryRepositoryInterface interface {

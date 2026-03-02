@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	categoryDtos "event-backend/app/category/dtos"
 	categoryInterfaces "event-backend/app/category/interfaces"
 	"event-backend/infrastructure/utils"
+	categoryDtos "event-backend/presentation/http/category/dtos"
 )
 
 type CategoryController struct {

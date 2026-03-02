@@ -2,11 +2,11 @@ package services
 
 import (
 	"context"
-	categoryDtos "event-backend/app/category/dtos"
 	categoryInterfaces "event-backend/app/category/interfaces"
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
 	"event-backend/infrastructure/exceptions"
+	categoryDtos "event-backend/presentation/http/category/dtos"
 	"time"
 
 	"github.com/google/uuid"
@@ -57,7 +57,6 @@ func (service *CategoryService) Create(ctx context.Context, dto *categoryDtos.Ca
 	return service.categoryStoreRepository.Create(ctx, newCategory)
 }
 
-
 func (service *CategoryService) Update(ctx context.Context, dto *categoryDtos.CategoryUpdateRequestDTO) *entities.CategoryEntity {
 	existingCategory := service.categoryQueryRepository.FindOneById(ctx, dto.Id)
 	if existingCategory == nil {
@@ -87,9 +86,9 @@ func (service *CategoryService) SoftDelete(ctx context.Context, id uuid.UUID) {
 
 	now := time.Now()
 	category.DeletedAt = gorm.DeletedAt{
-        Time:  now,
-        Valid: true,
-    }
+		Time:  now,
+		Valid: true,
+	}
 
 	service.categoryStoreRepository.Update(ctx, category)
 }

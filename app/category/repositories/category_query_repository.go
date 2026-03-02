@@ -7,12 +7,12 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	categorydtos "event-backend/app/category/dtos"
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
 	"event-backend/infrastructure/enums"
 	"event-backend/infrastructure/exceptions"
 	"event-backend/infrastructure/utils"
+	categorydtos "event-backend/presentation/http/category/dtos"
 )
 
 type CategoryQueryRepository struct {
