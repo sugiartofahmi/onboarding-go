@@ -26,7 +26,7 @@ func (category *CategoryStoreRepository) Create(ctx context.Context, entity *ent
 	err := query.Create(entity).Error
 	if err != nil {
 		log.Println("Error create category:", err)
-		panic(exceptions.ServerErrorException(err))
+		panic(*exceptions.ServerErrorException(err))
 	}
 
 	return entity
@@ -38,7 +38,7 @@ func (category *CategoryStoreRepository) Update(ctx context.Context, entity *ent
 	err := query.Where("id = ?", entity.Id).Updates(entity).Error
 	if err != nil {
 		log.Println("Error update category:", err)
-		panic(exceptions.ServerErrorException(err))
+		panic(*exceptions.ServerErrorException(err))
 	}
 
 	return entity

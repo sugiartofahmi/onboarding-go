@@ -19,7 +19,10 @@ func ExceptionMiddleware() gin.HandlerFunc {
 func handlePanic(c *gin.Context) {
 	if err := recover(); err != nil {
 		panicException := createPanicException(err)
-		errorMessage := getErrorMessageByStatusCode(panicException.StatusCode)
+		errorMessage := panicException.ErrorMessage
+		if errorMessage == "" {
+			errorMessage = getErrorMessageByStatusCode(panicException.StatusCode)
+		}
 
 		var errors *map[string]string
 		if panicException.ValidationErrors != nil {
@@ -33,6 +36,10 @@ func handlePanic(c *gin.Context) {
 }
 
 func createPanicException(err interface{}) exceptions.Exception {
+	if ex, ok := err.(*exceptions.Exception); ok {
+		return *ex
+	}
+
 	if ex, ok := err.(exceptions.Exception); ok {
 		return ex
 	}
