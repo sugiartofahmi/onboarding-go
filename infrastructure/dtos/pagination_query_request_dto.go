@@ -16,29 +16,32 @@ type PaginationQueryRequestDto struct {
 	Order   enums.SortOrderEnum `form:"order"`
 }
 
-func NewPaginationQueryRequestDto(c *gin.Context) *PaginationQueryRequestDto {
+func AssignPaginationQueryRequestDto(c *gin.Context) *PaginationQueryRequestDto {
 	q := &PaginationQueryRequestDto{}
 
-	if page, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && page >= 1 {
-		q.Page = page
-	} else {
-		q.Page = 1
+	queryParamsPage := c.Query("page")
+	if queryParamsPage == "" {
+		queryParamsPage = "1"
 	}
+	q.Page, _ = strconv.Atoi(queryParamsPage)
 
-	if perPage, err := strconv.Atoi(c.DefaultQuery("per_page", "10")); err == nil && perPage >= 1 && perPage <= 100 {
-		q.PerPage = perPage
-	} else {
-		q.PerPage = 10
+	queryParamsPerPage := c.Query("per_page")
+	if queryParamsPerPage == "" {
+		queryParamsPerPage = "10"
 	}
+	q.PerPage, _ = strconv.Atoi(queryParamsPerPage)
 
 	q.Search = c.Query("search")
-	q.SortBy = c.DefaultQuery("sort_by", "created_at")
 
-	order := enums.SortOrderEnum(c.DefaultQuery("order", string(enums.SortOrderDesc)))
-	if order != enums.SortOrderAsc && order != enums.SortOrderDesc {
-		order = enums.SortOrderDesc
+	q.SortBy = c.Query("sort_by")
+	if q.SortBy == "" {
+		q.SortBy = "created_at"
 	}
-	q.Order = order
+
+	q.Order = enums.SortOrderEnum(c.Query("order"))
+	if q.Order == "" {
+		q.Order = enums.SortOrderDesc
+	}
 
 	return q
 }

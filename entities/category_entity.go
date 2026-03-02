@@ -8,7 +8,7 @@ import (
 )
 
 type CategoryEntity struct {
-	ID        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	Id        uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
 	Name      string         `gorm:"size:255;uniqueIndex;not null"                   json:"name"`
 	Slug      string         `gorm:"size:255;uniqueIndex;not null"                   json:"slug"`
 	CreatedAt time.Time      `gorm:"autoCreateTime"                                  json:"created_at"`

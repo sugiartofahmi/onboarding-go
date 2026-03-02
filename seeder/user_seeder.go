@@ -53,7 +53,7 @@ func (s *UserSeeder) Handle(db *gorm.DB) error {
 		}
 
 		user := entities.UserEntity{
-			RoleID:   role.ID,
+			RoleID:   role.Id,
 			Name:     row.Name,
 			Email:    row.Email,
 			Password: hashed,

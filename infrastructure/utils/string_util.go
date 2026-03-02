@@ -1,6 +1,9 @@
 package utils
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 func StringToInt(value string) int {
     intValue, err := strconv.Atoi(value)
@@ -8,4 +11,11 @@ func StringToInt(value string) int {
         return 0
     }
     return intValue
+}
+
+func GenerateSlug(text string) string {
+        slug := strings.ToLower(text)
+        slug = strings.TrimSpace(slug)
+        slug = strings.ReplaceAll(slug, " ", "-")
+        return slug
 }

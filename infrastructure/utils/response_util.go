@@ -6,23 +6,23 @@ const ApiVersion = "1.0.0"
 
 type BaseResponse struct {
 	Version    string             `json:"version"`
-	StatusCode int                `json:"statusCode"`
-	Data       *interface{}       `json:"data,omitempty"`
-	Items      *interface{}       `json:"items,omitempty"`
+	StatusCode int                `json:"status_code"`
+	Data       *any               `json:"data,omitempty"`
+	Items      *any               `json:"items,omitempty"`
 	Count      *int               `json:"count,omitempty"`
 	Meta       *MetaResponse      `json:"meta,omitempty"`
-	Error      string             `json:"errorMessage,omitempty"`
+	Error      string             `json:"error_message,omitempty"`
 	Errors     *map[string]string `json:"errors,omitempty"`
 }
 
 type MetaResponse struct {
 	Page      int `json:"page"`
-	PerPage   int `json:"perPage"`
+	PerPage   int `json:"per_page"`
 	Total     int `json:"total"`
-	TotalPage int `json:"totalPage"`
+	TotalPage int `json:"total_page"`
 }
 
-func SuccessResponse(statusCode int, data interface{}) *BaseResponse {
+func SuccessResponse(statusCode int, data any) *BaseResponse {
 	return &BaseResponse{
 		Version:    ApiVersion,
 		StatusCode: statusCode,
@@ -30,7 +30,7 @@ func SuccessResponse(statusCode int, data interface{}) *BaseResponse {
 	}
 }
 
-func SuccessResponseList(statusCode int, items interface{}, count int) *BaseResponse {
+func SuccessResponseList(statusCode int, items any, count int) *BaseResponse {
 	return &BaseResponse{
 		Version:    ApiVersion,
 		StatusCode: statusCode,
@@ -39,7 +39,7 @@ func SuccessResponseList(statusCode int, items interface{}, count int) *BaseResp
 	}
 }
 
-func SuccessResponsePagination(statusCode int, items interface{}, meta MetaResponse) *BaseResponse {
+func SuccessResponsePagination(statusCode int, items any, meta MetaResponse) *BaseResponse {
 	return &BaseResponse{
 		Version:    ApiVersion,
 		StatusCode: statusCode,

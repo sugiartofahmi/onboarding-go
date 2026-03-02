@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"event-backend/infrastructure/exception"
+	"event-backend/infrastructure/exceptions"
 	"event-backend/infrastructure/utils"
 )
 
@@ -32,12 +32,12 @@ func handlePanic(c *gin.Context) {
 	}
 }
 
-func createPanicException(err interface{}) exception.Exception {
-	if ex, ok := err.(exception.Exception); ok {
+func createPanicException(err interface{}) exceptions.Exception {
+	if ex, ok := err.(exceptions.Exception); ok {
 		return ex
 	}
 
-	return exception.Exception{
+	return exceptions.Exception{
 		ErrorMessage: err.(error).Error(),
 		StatusCode:   http.StatusInternalServerError,
 	}
