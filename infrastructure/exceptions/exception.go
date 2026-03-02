@@ -49,7 +49,6 @@ func NotFoundException(message string) *Exception {
 	}
 }
 
-
 // 422 Unprocessable Entity
 func UnprocessableEntityException(message string) *Exception {
 	return &Exception{

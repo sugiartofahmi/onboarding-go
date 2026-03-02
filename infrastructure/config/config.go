@@ -11,29 +11,29 @@ import (
 var once sync.Once
 
 func LoadConfig() {
-    once.Do(func() {
-        if err := godotenv.Load(); err != nil {
-            log.Fatalf("failed to load .env file: %v", err)
-        }
-    })
+	once.Do(func() {
+		if err := godotenv.Load(); err != nil {
+			log.Fatalf("failed to load .env file: %v", err)
+		}
+	})
 }
 
 func Get(key, defaultValue string) string {
-    LoadConfig()
-    value := os.Getenv(key)
-    isValueExist := value != ""
-    if isValueExist {
-        return value
-    }
-    return defaultValue
+	LoadConfig()
+	value := os.Getenv(key)
+	isValueExist := value != ""
+	if isValueExist {
+		return value
+	}
+	return defaultValue
 }
 
 func GetRequired(key string) string {
-    LoadConfig()
-    value := os.Getenv(key)
-    isValueExist := value != ""
-    if !isValueExist {
-        log.Fatalf("required environment variable %q is not set", key)
-    }
-    return value
+	LoadConfig()
+	value := os.Getenv(key)
+	isValueExist := value != ""
+	if !isValueExist {
+		log.Fatalf("required environment variable %q is not set", key)
+	}
+	return value
 }
