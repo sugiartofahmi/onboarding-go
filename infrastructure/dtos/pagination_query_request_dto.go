@@ -3,11 +3,12 @@ package dtos
 import (
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"event-backend/infrastructure/enums"
+
+	"github.com/gin-gonic/gin"
 )
 
-type PaginationQueryRequestDTO struct {
+type PaginationQueryRequestDto struct {
 	Search  string              `form:"search"`
 	PerPage int                 `form:"per_page"`
 	Page    int                 `form:"page"`
@@ -15,8 +16,8 @@ type PaginationQueryRequestDTO struct {
 	Order   enums.SortOrderEnum `form:"order"`
 }
 
-func NewPaginationQueryRequestDTO(c *gin.Context) *PaginationQueryRequestDTO {
-	q := &PaginationQueryRequestDTO{}
+func NewPaginationQueryRequestDto(c *gin.Context) *PaginationQueryRequestDto {
+	q := &PaginationQueryRequestDto{}
 
 	if page, err := strconv.Atoi(c.DefaultQuery("page", "1")); err == nil && page >= 1 {
 		q.Page = page

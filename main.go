@@ -11,11 +11,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
 	"event-backend/infrastructure/config"
 	"event-backend/infrastructure/database"
+	"event-backend/infrastructure/middlewares"
 	redisFactory "event-backend/infrastructure/redis/factories"
 	redisInterfaces "event-backend/infrastructure/redis/interfaces"
 	redisServices "event-backend/infrastructure/redis/services"
@@ -96,9 +98,22 @@ func initializeRedis() {
 }
 
 func initializeRouter() {
-	gin.SetMode(config.AppEnv)
 	router = gin.New()
-	router.Use(gin.Recovery(), gin.Logger())
+	router.ContextWithFallback = true
+
+	gin.SetMode(config.AppEnv)
+
+	corsConfig := cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
+
+	router.Use(cors.New(corsConfig))
+	router.Use(middlewares.ExceptionMiddleware())
 }
 
 func initializeRepositories() {
