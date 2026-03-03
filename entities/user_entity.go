@@ -40,7 +40,7 @@ func HashPassword(password string) string {
 	return string(hash)
 }
 
-func (user *UserEntity) BeforeCreate(tx *gorm.DB) {
-	hashedPassword := HashPassword(user.Password)
-	user.Password = hashedPassword
+func (user *UserEntity) BeforeCreate(tx *gorm.DB) error {
+	user.Password = HashPassword(user.Password)
+	return nil
 }
