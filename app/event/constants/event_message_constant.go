@@ -13,4 +13,8 @@ const (
 	EVENT_ALREADY_PUBLISHED = "Event already published"
 	EVENT_PUBLISH_NO_TICKET = "Cannot publish event without tickets"
 	EVENT_MIN_ONE_TICKET    = "Event must have at least one ticket"
+
+	EVENT_CATEGORY_NOT_FOUND = "Category not found"
+	EVENT_TITLE_EXISTS       = "Event title already exists"
+	EVENT_SLUG_EXISTS        = "Event slug already exists"
 )

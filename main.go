@@ -39,6 +39,11 @@ import (
 	roleServices "event-backend/app/role/services"
 	roleControllers "event-backend/presentation/http/role/controllers"
 
+	eventInterfaces "event-backend/app/event/interfaces"
+	eventRepositories "event-backend/app/event/repositories"
+	eventServices "event-backend/app/event/services"
+	eventControllers "event-backend/presentation/http/event/controllers"
+
 	userInterfaces "event-backend/app/user/interfaces"
 	userRepositories "event-backend/app/user/repositories"
 	userServices "event-backend/app/user/services"
@@ -65,6 +70,9 @@ var (
 	roleQueryRepository     roleInterfaces.RoleQueryRepositoryInterface
 	roleStoreRepository     roleInterfaces.RoleStoreRepositoryInterface
 	roleService             roleInterfaces.RoleServiceInterface
+	eventQueryRepository    eventInterfaces.EventQueryRepositoryInterface
+	eventStoreRepository    eventInterfaces.EventStoreRepositoryInterface
+	eventService            eventInterfaces.EventServiceInterface
 	userQueryRepository     userInterfaces.UserQueryRepositoryInterface
 	userStoreRepository     userInterfaces.UserStoreRepositoryInterface
 	userService             userInterfaces.UserServiceInterface
@@ -164,6 +172,8 @@ func initializeRepositories() {
 	authStoreRepository = authRepositories.NewAuthStoreRepository(db)
 	roleQueryRepository = roleRepositories.NewRoleQueryRepository(db)
 	roleStoreRepository = roleRepositories.NewRoleStoreRepository(db)
+	eventQueryRepository = eventRepositories.NewEventQueryRepository(db)
+	eventStoreRepository = eventRepositories.NewEventStoreRepository(db)
 	userQueryRepository = userRepositories.NewUserQueryRepository(db)
 	userStoreRepository = userRepositories.NewUserStoreRepository(db)
 }
@@ -172,6 +182,7 @@ func initializeServices() {
 	categoryService = categoryServices.NewCategoryService(categoryQueryRepository, categoryStoreRepository)
 	authService = authServices.NewAuthService(authQueryRepository, authStoreRepository, roleQueryRepository)
 	roleService = roleServices.NewRoleService(roleQueryRepository, roleStoreRepository)
+	eventService = eventServices.NewEventService(eventQueryRepository, eventStoreRepository, categoryQueryRepository)
 	userService = userServices.NewUserService(userQueryRepository, userStoreRepository, roleQueryRepository)
 }
 
@@ -179,6 +190,7 @@ func initializeControllers() {
 	categoryControllers.NewCategoryController(router, categoryService)
 	authControllers.NewAuthController(router, authService)
 	roleControllers.NewRoleController(router, roleService)
+	eventControllers.NewEventController(router, eventService)
 	userControllers.NewUserController(router, userService)
 }
 
