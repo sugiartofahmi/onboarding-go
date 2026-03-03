@@ -1,14 +1,11 @@
 package seeder
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 
-	"golang.org/x/crypto/argon2"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
 	"event-backend/entities"
@@ -47,13 +44,10 @@ func (s *UserSeeder) Handle(db *gorm.DB) error {
 			continue
 		}
 
-		hashed, err := hashPassword(row.Password)
-		if err != nil {
-			return err
-		}
+		hashed := hashPassword(row.Password)
 
 		user := entities.UserEntity{
-			RoleID:   role.Id,
+			RoleId:   role.Id,
 			Name:     row.Name,
 			Email:    row.Email,
 			Password: hashed,
@@ -67,16 +61,10 @@ func (s *UserSeeder) Handle(db *gorm.DB) error {
 	return nil
 }
 
-func hashPassword(password string) (string, error) {
-	salt := make([]byte, 16)
-	if _, err := rand.Read(salt); err != nil {
-		return "", err
+func hashPassword(password string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		panic(err)
 	}
-
-	hash := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
-
-	encodedSalt := base64.RawStdEncoding.EncodeToString(salt)
-	encodedHash := base64.RawStdEncoding.EncodeToString(hash)
-
-	return fmt.Sprintf("$argon2id$v=19$m=65536,t=1,p=4$%s$%s", encodedSalt, encodedHash), nil
+	return string(hash)
 }

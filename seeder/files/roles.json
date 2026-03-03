@@ -1,5 +1,5 @@
 [
-    { "name": "Admin" },
-    { "name": "Organizer" },
-    { "name": "Attendee" }
+    { "name": "admin" },
+    { "name": "organizer" },
+    { "name": "attendee" }
 ]

@@ -1,5 +1,5 @@
 [
-    { "name": "Admin User",     "email": "admin@event.com",     "password": "password", "role_name": "Admin" },
-    { "name": "Organizer User", "email": "organizer@event.com", "password": "password", "role_name": "Organizer" },
-    { "name": "Attendee User",  "email": "attendee@event.com",  "password": "password", "role_name": "Attendee" }
+    { "name": "Admin User",     "email": "admin@event.com",     "password": "password", "role_name": "admin" },
+    { "name": "Organizer User", "email": "organizer@event.com", "password": "password", "role_name": "organizer" },
+    { "name": "Attendee User",  "email": "attendee@event.com",  "password": "password", "role_name": "attendee" }
 ]
