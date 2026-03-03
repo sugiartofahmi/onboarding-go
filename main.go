@@ -28,6 +28,9 @@ import (
 	categoryRepositories "event-backend/app/category/repositories"
 	categoryServices "event-backend/app/category/services"
 	categoryControllers "event-backend/presentation/http/category/controllers"
+
+	authInterfaces "event-backend/app/auth/interfaces"
+	authRepositories "event-backend/app/auth/repositories"
 )
 
 var (
@@ -44,6 +47,7 @@ var (
 	categoryQueryRepository categoryInterfaces.CategoryQueryRepositoryInterface
 	categoryStoreRepository categoryInterfaces.CategoryStoreRepositoryInterface
 	categoryService         categoryInterfaces.CategoryServiceInterface
+	authQueryRepository authInterfaces.AuthQueryRepositoryInterface
 )
 
 func main() {
@@ -136,6 +140,7 @@ func initializeRouter() {
 func initializeRepositories() {
 	categoryQueryRepository = categoryRepositories.NewCategoryQueryRepository(db)
 	categoryStoreRepository = categoryRepositories.NewCategoryStoreRepository(db)
+	authQueryRepository = authRepositories.NewAuthQueryRepository(db)
 }
 
 func initializeServices() {
