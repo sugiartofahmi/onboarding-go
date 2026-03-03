@@ -9,8 +9,8 @@ import (
 
 type EventEntity struct {
 	Id              uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"                                                                                                json:"id"`
-	OrganizerUserID uuid.UUID      `gorm:"type:uuid;not null;index:idx_events_organizer_status,priority:1"                                                                               json:"organizer_user_id"`
-	CategoryID      uuid.UUID      `gorm:"type:uuid;not null;index:idx_events_category_status,priority:1"                                                                                json:"category_id"`
+	OrganizerUserId uuid.UUID      `gorm:"type:uuid;not null;index:idx_events_organizer_status,priority:1"                                                                               json:"organizer_user_id"`
+	CategoryId      uuid.UUID      `gorm:"type:uuid;not null;index:idx_events_category_status,priority:1"                                                                                json:"category_id"`
 	Title           string         `gorm:"size:255;not null"                                                                                                                              json:"title"`
 	Slug            string         `gorm:"size:255;uniqueIndex;not null"                                                                                                                  json:"slug"`
 	Description     *string        `gorm:"type:text"                                                                                                                                      json:"description,omitempty"`
@@ -26,9 +26,10 @@ type EventEntity struct {
 	DeletedBy       *uuid.UUID     `gorm:"type:uuid"                                                                                                                                      json:"deleted_by,omitempty"`
 
 	// Relations
-	Organizer UserEntity          `gorm:"foreignKey:OrganizerUserID" json:"organizer,omitempty"`
-	Category  CategoryEntity      `gorm:"foreignKey:CategoryID"      json:"category,omitempty"`
-	Tickets   []EventTicketEntity `gorm:"foreignKey:EventID"         json:"tickets,omitempty"`
+	Organizer     UserEntity                `gorm:"foreignKey:OrganizerUserId" json:"organizer,omitempty"`
+	Category      CategoryEntity            `gorm:"foreignKey:CategoryId"    json:"category,omitempty"`
+	Tickets       []EventTicketEntity       `gorm:"foreignKey:EventId"        json:"tickets,omitempty"`
+	Registrations []EventRegistrationEntity `gorm:"foreignKey:EventId"        json:"registrations,omitempty"`
 }
 
 func (EventEntity) TableName() string { return "events" }

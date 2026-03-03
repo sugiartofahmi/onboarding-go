@@ -19,7 +19,7 @@ type CategoryEntity struct {
 	DeletedBy *uuid.UUID     `gorm:"type:uuid"                                       json:"deleted_by,omitempty"`
 
 	// Relations
-	Events []EventEntity `gorm:"foreignKey:CategoryID" json:"events,omitempty"`
+	Events []EventEntity `gorm:"foreignKey:CategoryId" json:"events,omitempty"`
 }
 
 func (CategoryEntity) TableName() string { return "categories" }

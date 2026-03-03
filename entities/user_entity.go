@@ -22,9 +22,9 @@ type UserEntity struct {
 	DeletedBy *uuid.UUID     `gorm:"type:uuid"                                          json:"deleted_by,omitempty"`
 
 	// Relations
-	Role          RoleEntity                `gorm:"foreignKey:RoleID"          json:"role,omitempty"`
-	Events        []EventEntity             `gorm:"foreignKey:OrganizerUserID" json:"events,omitempty"`
-	Registrations []EventRegistrationEntity `gorm:"foreignKey:UserID"          json:"registrations,omitempty"`
+	Role          RoleEntity                `gorm:"foreignKey:RoleId"          json:"role,omitempty"`
+	Events        []EventEntity             `gorm:"foreignKey:OrganizerUserId" json:"events,omitempty"`
+	Registrations []EventRegistrationEntity `gorm:"foreignKey:UserId"          json:"registrations,omitempty"`
 }
 
 func (UserEntity) TableName() string { return "users" }
