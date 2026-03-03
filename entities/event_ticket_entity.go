@@ -9,7 +9,7 @@ import (
 
 type EventTicketEntity struct {
 	Id              uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"                                                        json:"id"`
-	EventID         uuid.UUID      `gorm:"type:uuid;not null;index:idx_event_tickets_event_id;uniqueIndex:uq_event_tickets_event_type,priority:1" json:"event_id"`
+	EventId         uuid.UUID      `gorm:"type:uuid;not null;index:idx_event_tickets_event_id;uniqueIndex:uq_event_tickets_event_type,priority:1" json:"event_id"`
 	Type            int            `gorm:"not null;uniqueIndex:uq_event_tickets_event_type,priority:2"                                            json:"type"`
 	Price           float64        `gorm:"type:decimal(12,2);not null"                                                                            json:"price"`
 	Quota           int            `gorm:"not null"                                                                                               json:"quota"`
@@ -22,8 +22,8 @@ type EventTicketEntity struct {
 	DeletedBy       *uuid.UUID     `gorm:"type:uuid"                                                                                              json:"deleted_by,omitempty"`
 
 	// Relations
-	Event         EventEntity               `gorm:"foreignKey:EventID"       json:"event,omitempty"`
-	Registrations []EventRegistrationEntity `gorm:"foreignKey:EventTicketID" json:"registrations,omitempty"`
+	Event         EventEntity               `gorm:"foreignKey:EventId"        json:"event,omitempty"`
+	Registrations []EventRegistrationEntity `gorm:"foreignKey:EventTicketId" json:"registrations,omitempty"`
 }
 
 func (EventTicketEntity) TableName() string { return "event_tickets" }

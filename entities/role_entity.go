@@ -18,7 +18,7 @@ type RoleEntity struct {
 	DeletedBy *uuid.UUID     `gorm:"type:uuid"                                       json:"deleted_by,omitempty"`
 
 	// Relations
-	Users []UserEntity `gorm:"foreignKey:RoleID" json:"users,omitempty"`
+	Users []UserEntity `gorm:"foreignKey:RoleId" json:"users,omitempty"`
 }
 
 func (RoleEntity) TableName() string { return "roles" }
