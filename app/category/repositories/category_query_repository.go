@@ -27,7 +27,7 @@ func NewCategoryQueryRepository(db *gorm.DB) *CategoryQueryRepository {
 	}
 }
 
-func (category *CategoryQueryRepository) Pagination(ctx context.Context, dto *categorydtos.CategoryQueryRequestDTO) *infradtos.PaginationResultDto[entities.CategoryEntity] {
+func (category *CategoryQueryRepository) Pagination(ctx context.Context, dto *categorydtos.CategoryQueryRequestDto) *infradtos.PaginationResultDto[entities.CategoryEntity] {
 	query := category.categoryModel.WithContext(ctx)
 	var results []*entities.CategoryEntity
 	var total int64
@@ -157,14 +157,14 @@ func (category *CategoryQueryRepository) IsExistsBySlugExcludeId(ctx context.Con
 
 // Private helper methods
 
-func (category *CategoryQueryRepository) QuerySearch(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDTO) *gorm.DB {
+func (category *CategoryQueryRepository) QuerySearch(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("name ILIKE ?", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (category *CategoryQueryRepository) QuerySort(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDTO) *gorm.DB {
+func (category *CategoryQueryRepository) QuerySort(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDto) *gorm.DB {
 	allowedSortFields := map[string]bool{
 		"name":       true,
 		"created_at": true,

@@ -6,12 +6,12 @@ import (
 	"event-backend/entities"
 )
 
-type RoleUpdateRequestDTO struct {
-	RoleCreateRequestDTO
+type RoleUpdateRequestDto struct {
+	RoleCreateRequestDto
 	Id uuid.UUID `json:"-"`
 }
 
-func (dto *RoleUpdateRequestDTO) ToEntity(existingEntity *entities.RoleEntity) *entities.RoleEntity {
+func (dto *RoleUpdateRequestDto) ToEntity(existingEntity *entities.RoleEntity) *entities.RoleEntity {
 	existingEntity.Name = dto.Name
 	return existingEntity
 }

@@ -6,12 +6,12 @@ import (
 	infradtos "event-backend/infrastructure/dtos"
 )
 
-type CategoryQueryRequestDTO struct {
+type CategoryQueryRequestDto struct {
 	infradtos.PaginationQueryRequestDto
 }
 
-func AssignCategoryQueryRequestDTO(c *gin.Context) *CategoryQueryRequestDTO {
-	return &CategoryQueryRequestDTO{
+func AssignCategoryQueryRequestDto(c *gin.Context) *CategoryQueryRequestDto {
+	return &CategoryQueryRequestDto{
 		PaginationQueryRequestDto: *infradtos.AssignPaginationQueryRequestDto(c),
 	}
 }

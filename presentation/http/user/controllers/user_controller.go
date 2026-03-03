@@ -35,7 +35,7 @@ func NewUserController(router *gin.Engine, userService userInterfaces.UserServic
 func (controller *UserController) Pagination() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := userDtos.AssignUserQueryRequestDTO(httpContext)
+		dto := userDtos.AssignUserQueryRequestDto(httpContext)
 		result := controller.userService.Pagination(ctx, dto)
 		meta := utils.PaginationMetaBuilder(dto.Page, dto.PerPage, int(result.Count))
 		items := userDtos.UserResponseDtoFromEntities(result.Data)
@@ -60,7 +60,7 @@ func (controller *UserController) Update() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
-		dto := &userDtos.UserUpdateRequestDTO{}
+		dto := &userDtos.UserUpdateRequestDto{}
 		httpContext.ShouldBindJSON(dto)
 		dto.Id = id
 		result := controller.userService.Update(ctx, dto)
@@ -84,7 +84,7 @@ func (controller *UserController) Delete() gin.HandlerFunc {
 func (controller *UserController) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := &userDtos.UserCreateRequestDTO{}
+		dto := &userDtos.UserCreateRequestDto{}
 		httpContext.ShouldBindJSON(dto)
 		result := controller.userService.Create(ctx, dto)
 		response := utils.SuccessResponse(http.StatusCreated, userConstants.USER_CREATE_SUCCESS, userDtos.UserDetailResponseDtoFromEntity(result))

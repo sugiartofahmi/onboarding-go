@@ -35,7 +35,7 @@ func NewRoleController(router *gin.Engine, roleService roleInterfaces.RoleServic
 func (controller *RoleController) Pagination() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := roleDtos.AssignRoleQueryRequestDTO(httpContext)
+		dto := roleDtos.AssignRoleQueryRequestDto(httpContext)
 		result := controller.roleService.Pagination(ctx, dto)
 		meta := utils.PaginationMetaBuilder(dto.Page, dto.PerPage, int(result.Count))
 		items := roleDtos.RoleResponseDtoFromEntities(result.Data)
@@ -59,7 +59,7 @@ func (controller *RoleController) Detail() gin.HandlerFunc {
 func (controller *RoleController) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := &roleDtos.RoleCreateRequestDTO{}
+		dto := &roleDtos.RoleCreateRequestDto{}
 		httpContext.ShouldBindJSON(dto)
 		result := controller.roleService.Create(ctx, dto)
 		response := utils.SuccessResponse(http.StatusCreated, roleConstants2.ROLE_CREATE_SUCCESS, roleDtos.RoleDetailResponseDtoFromEntity(*result))
@@ -72,7 +72,7 @@ func (controller *RoleController) Update() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
-		dto := &roleDtos.RoleUpdateRequestDTO{}
+		dto := &roleDtos.RoleUpdateRequestDto{}
 		httpContext.ShouldBindJSON(dto)
 		dto.Id = id
 		result := controller.roleService.Update(ctx, dto)

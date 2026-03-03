@@ -11,7 +11,7 @@ import (
 )
 
 type RoleQueryRepositoryInterface interface {
-	Pagination(ctx context.Context, dto *roledtos.RoleQueryRequestDTO) *infradtos.PaginationResultDto[entities.RoleEntity]
+	Pagination(ctx context.Context, dto *roledtos.RoleQueryRequestDto) *infradtos.PaginationResultDto[entities.RoleEntity]
 	FindOneById(ctx context.Context, id uuid.UUID) *entities.RoleEntity
 	FindOneByName(ctx context.Context, name string) *entities.RoleEntity
 	IsExistsById(ctx context.Context, id uuid.UUID) bool

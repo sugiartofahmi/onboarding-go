@@ -27,7 +27,7 @@ func NewUserQueryRepository(db *gorm.DB) *UserQueryRepository {
 	}
 }
 
-func (user *UserQueryRepository) Pagination(ctx context.Context, dto *userdtos.UserQueryRequestDTO) *infradtos.PaginationResultDto[entities.UserEntity] {
+func (user *UserQueryRepository) Pagination(ctx context.Context, dto *userdtos.UserQueryRequestDto) *infradtos.PaginationResultDto[entities.UserEntity] {
 	query := user.userModel.WithContext(ctx)
 	var results []*entities.UserEntity
 	var total int64
@@ -134,14 +134,14 @@ func (user *UserQueryRepository) IsExistsByEmailExcludeId(ctx context.Context, e
 	return exists
 }
 
-func (user *UserQueryRepository) QuerySearch(db *gorm.DB, dto *userdtos.UserQueryRequestDTO) *gorm.DB {
+func (user *UserQueryRepository) QuerySearch(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("name ILIKE ? OR email ILIKE ?", "%"+dto.Search+"%", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (user *UserQueryRepository) QuerySort(db *gorm.DB, dto *userdtos.UserQueryRequestDTO) *gorm.DB {
+func (user *UserQueryRepository) QuerySort(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
 	allowedSortFields := map[string]bool{
 		"name":       true,
 		"email":      true,

@@ -30,7 +30,7 @@ func NewCategoryService(
 	}
 }
 
-func (service *CategoryService) Pagination(ctx context.Context, dto *categoryDtos.CategoryQueryRequestDTO) *infradtos.PaginationResultDto[entities.CategoryEntity] {
+func (service *CategoryService) Pagination(ctx context.Context, dto *categoryDtos.CategoryQueryRequestDto) *infradtos.PaginationResultDto[entities.CategoryEntity] {
 	return service.categoryQueryRepository.Pagination(ctx, dto)
 }
 
@@ -43,7 +43,7 @@ func (service *CategoryService) Detail(ctx context.Context, id uuid.UUID) *entit
 	return data
 }
 
-func (service *CategoryService) Create(ctx context.Context, dto *categoryDtos.CategoryCreateRequestDTO) *entities.CategoryEntity {
+func (service *CategoryService) Create(ctx context.Context, dto *categoryDtos.CategoryCreateRequestDto) *entities.CategoryEntity {
 	newCategory := dto.ToEntity()
 	isExistsByName := service.categoryQueryRepository.IsExistsByName(ctx, newCategory.Name)
 
@@ -59,7 +59,7 @@ func (service *CategoryService) Create(ctx context.Context, dto *categoryDtos.Ca
 	return service.categoryStoreRepository.Create(ctx, newCategory)
 }
 
-func (service *CategoryService) Update(ctx context.Context, dto *categoryDtos.CategoryUpdateRequestDTO) *entities.CategoryEntity {
+func (service *CategoryService) Update(ctx context.Context, dto *categoryDtos.CategoryUpdateRequestDto) *entities.CategoryEntity {
 	existingCategory := service.categoryQueryRepository.FindOneById(ctx, dto.Id)
 	if existingCategory == nil {
 		panic(*exceptions.NotFoundException(categoryConstants.CATEGORY_NOT_FOUND))
