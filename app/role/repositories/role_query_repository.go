@@ -2,12 +2,17 @@ package repositories
 
 import (
 	"context"
-	"event-backend/entities"
-	"event-backend/infrastructure/exceptions"
 	"log"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+
+	"event-backend/entities"
+	infradtos "event-backend/infrastructure/dtos"
+	"event-backend/infrastructure/enums"
+	"event-backend/infrastructure/exceptions"
+	"event-backend/infrastructure/utils"
+	roledtos "event-backend/presentation/http/role/dtos"
 )
 
 type RoleQueryRepository struct {
@@ -19,6 +24,32 @@ func NewRoleQueryRepository(db *gorm.DB) *RoleQueryRepository {
 	return &RoleQueryRepository{
 		db:        db,
 		roleModel: db.Model(&entities.RoleEntity{}),
+	}
+}
+
+func (repo *RoleQueryRepository) Pagination(ctx context.Context, dto *roledtos.RoleQueryRequestDTO) *infradtos.PaginationResultDto[entities.RoleEntity] {
+	query := repo.roleModel.WithContext(ctx)
+	var results []*entities.RoleEntity
+	var total int64
+
+	query = repo.QuerySearch(query, dto)
+	query = repo.QuerySort(query, dto)
+
+	err := query.Count(&total).Error
+	if err != nil {
+		log.Println("Error count roles:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	err = query.Session(&gorm.Session{}).Scopes(utils.Paginate(&dto.PaginationQueryRequestDto)).Find(&results).Error
+	if err != nil {
+		log.Println("Error find roles:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return &infradtos.PaginationResultDto[entities.RoleEntity]{
+		Data:  results,
+		Count: total,
 	}
 }
 
@@ -61,4 +92,67 @@ func (repo *RoleQueryRepository) IsExistsById(ctx context.Context, id uuid.UUID)
 		panic(*exceptions.ServerErrorException(err))
 	}
 	return exists
+}
+
+func (repo *RoleQueryRepository) IsExistsByName(ctx context.Context, name string) bool {
+	query := repo.roleModel.WithContext(ctx)
+	var exists bool
+
+	err := query.
+		Select("1").
+		Where("name = ?", name).
+		Limit(1).
+		Scan(&exists).Error
+
+	if err != nil {
+		log.Println("Error check role exists by name:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return exists
+}
+
+func (repo *RoleQueryRepository) IsExistsByNameExcludeId(ctx context.Context, name string, excludeID uuid.UUID) bool {
+	query := repo.roleModel.WithContext(ctx)
+	var exists bool
+
+	err := query.
+		Select("1").
+		Where("name = ? AND id != ?", name, excludeID).
+		Limit(1).
+		Scan(&exists).Error
+
+	if err != nil {
+		log.Println("Error check role exists by name exclude id:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return exists
+}
+
+func (repo *RoleQueryRepository) QuerySearch(db *gorm.DB, dto *roledtos.RoleQueryRequestDTO) *gorm.DB {
+	if dto.Search != "" {
+		db = db.Where("name ILIKE ?", "%"+dto.Search+"%")
+	}
+	return db
+}
+
+func (repo *RoleQueryRepository) QuerySort(db *gorm.DB, dto *roledtos.RoleQueryRequestDTO) *gorm.DB {
+	allowedSortFields := map[string]bool{
+		"name":       true,
+		"created_at": true,
+		"updated_at": true,
+	}
+
+	sortBy := dto.SortBy
+	if sortBy == "" || !allowedSortFields[sortBy] {
+		sortBy = "created_at"
+	}
+
+	order := "DESC"
+	if dto.Order == enums.SortOrderAsc {
+		order = "ASC"
+	}
+
+	return db.Order(sortBy + " " + order)
 }

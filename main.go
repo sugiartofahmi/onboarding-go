@@ -36,6 +36,8 @@ import (
 
 	roleInterfaces "event-backend/app/role/interfaces"
 	roleRepositories "event-backend/app/role/repositories"
+	roleServices "event-backend/app/role/services"
+	roleControllers "event-backend/presentation/http/role/controllers"
 
 	userInterfaces "event-backend/app/user/interfaces"
 	userRepositories "event-backend/app/user/repositories"
@@ -61,6 +63,8 @@ var (
 	authStoreRepository     authInterfaces.AuthStoreRepositoryInterface
 	authService             authInterfaces.AuthServiceInterface
 	roleQueryRepository     roleInterfaces.RoleQueryRepositoryInterface
+	roleStoreRepository     roleInterfaces.RoleStoreRepositoryInterface
+	roleService             roleInterfaces.RoleServiceInterface
 	userQueryRepository     userInterfaces.UserQueryRepositoryInterface
 	userStoreRepository     userInterfaces.UserStoreRepositoryInterface
 	userService             userInterfaces.UserServiceInterface
@@ -159,6 +163,7 @@ func initializeRepositories() {
 	authQueryRepository = authRepositories.NewAuthQueryRepository(db)
 	authStoreRepository = authRepositories.NewAuthStoreRepository(db)
 	roleQueryRepository = roleRepositories.NewRoleQueryRepository(db)
+	roleStoreRepository = roleRepositories.NewRoleStoreRepository(db)
 	userQueryRepository = userRepositories.NewUserQueryRepository(db)
 	userStoreRepository = userRepositories.NewUserStoreRepository(db)
 }
@@ -166,12 +171,14 @@ func initializeRepositories() {
 func initializeServices() {
 	categoryService = categoryServices.NewCategoryService(categoryQueryRepository, categoryStoreRepository)
 	authService = authServices.NewAuthService(authQueryRepository, authStoreRepository, roleQueryRepository)
+	roleService = roleServices.NewRoleService(roleQueryRepository, roleStoreRepository)
 	userService = userServices.NewUserService(userQueryRepository, userStoreRepository, roleQueryRepository)
 }
 
 func initializeControllers() {
 	categoryControllers.NewCategoryController(router, categoryService)
 	authControllers.NewAuthController(router, authService)
+	roleControllers.NewRoleController(router, roleService)
 	userControllers.NewUserController(router, userService)
 }
 
