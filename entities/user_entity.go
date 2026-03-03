@@ -3,7 +3,10 @@ package entities
 import (
 	"time"
 
+	"event-backend/infrastructure/exceptions"
+
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -28,3 +31,16 @@ type UserEntity struct {
 }
 
 func (UserEntity) TableName() string { return "users" }
+
+func HashPassword(password string) string {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		panic(*exceptions.ServerErrorException(err))
+	}
+	return string(hash)
+}
+
+func (user *UserEntity) BeforeCreate(tx *gorm.DB) {
+	hashedPassword := HashPassword(user.Password)
+	user.Password = hashedPassword
+}
