@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	categoryConstants "event-backend/app/category/constants"
 	categoryInterfaces "event-backend/app/category/interfaces"
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
@@ -36,7 +37,7 @@ func (service *CategoryService) Pagination(ctx context.Context, dto *categoryDto
 func (service *CategoryService) Detail(ctx context.Context, id uuid.UUID) *entities.CategoryEntity {
 	data := service.categoryQueryRepository.FindOneById(ctx, id)
 	if data == nil {
-		panic(*exceptions.NotFoundException("Category not found"))
+		panic(*exceptions.NotFoundException(categoryConstants.CATEGORY_NOT_FOUND))
 	}
 
 	return data
@@ -47,12 +48,12 @@ func (service *CategoryService) Create(ctx context.Context, dto *categoryDtos.Ca
 	isExistsByName := service.categoryQueryRepository.IsExistsByName(ctx, newCategory.Name)
 
 	if isExistsByName {
-		panic(*exceptions.UnprocessableEntityException("Category name already exists"))
+		panic(*exceptions.UnprocessableEntityException(categoryConstants.CATEGORY_NAME_EXISTS))
 	}
 
 	isExistsBySlug := service.categoryQueryRepository.IsExistsBySlug(ctx, newCategory.Slug)
 	if isExistsBySlug {
-		panic(*exceptions.UnprocessableEntityException("Category slug already exists"))
+		panic(*exceptions.UnprocessableEntityException(categoryConstants.CATEGORY_SLUG_EXISTS))
 	}
 
 	return service.categoryStoreRepository.Create(ctx, newCategory)
@@ -61,19 +62,19 @@ func (service *CategoryService) Create(ctx context.Context, dto *categoryDtos.Ca
 func (service *CategoryService) Update(ctx context.Context, dto *categoryDtos.CategoryUpdateRequestDTO) *entities.CategoryEntity {
 	existingCategory := service.categoryQueryRepository.FindOneById(ctx, dto.Id)
 	if existingCategory == nil {
-		panic(*exceptions.NotFoundException("Category not found"))
+		panic(*exceptions.NotFoundException(categoryConstants.CATEGORY_NOT_FOUND))
 	}
 
 	updateCategory := dto.ToEntity(existingCategory)
 
 	isExistsByName := service.categoryQueryRepository.IsExistsByNameExcludeId(ctx, updateCategory.Name, updateCategory.Id)
 	if isExistsByName {
-		panic(*exceptions.BadRequestException("Category name already exists"))
+		panic(*exceptions.BadRequestException(categoryConstants.CATEGORY_NAME_EXISTS))
 	}
 
 	isExistsBySlug := service.categoryQueryRepository.IsExistsBySlugExcludeId(ctx, updateCategory.Slug, updateCategory.Id)
 	if isExistsBySlug {
-		panic(*exceptions.BadRequestException("Category slug already exists"))
+		panic(*exceptions.BadRequestException(categoryConstants.CATEGORY_SLUG_EXISTS))
 	}
 
 	return service.categoryStoreRepository.Update(ctx, updateCategory)
@@ -82,7 +83,7 @@ func (service *CategoryService) Update(ctx context.Context, dto *categoryDtos.Ca
 func (service *CategoryService) SoftDelete(ctx context.Context, id uuid.UUID) {
 	category := service.categoryQueryRepository.FindOneById(ctx, id)
 	if category == nil {
-		panic(*exceptions.NotFoundException("Category not found"))
+		panic(*exceptions.NotFoundException(categoryConstants.CATEGORY_NOT_FOUND))
 	}
 
 	now := time.Now()
