@@ -61,7 +61,9 @@ func Create(_ *gorm.DB, fileName string) {
 }
 
 func initializeMigrator(sqlDB *sql.DB) (*migrate.Migrate, error) {
-	driver, err := postgres.WithInstance(sqlDB, &postgres.Config{})
+	driver, err := postgres.WithInstance(sqlDB, &postgres.Config{
+		MigrationsTable: "migrations",
+	})
 	if err != nil {
 		return nil, fmt.Errorf("could not create postgres driver: %w", err)
 	}
