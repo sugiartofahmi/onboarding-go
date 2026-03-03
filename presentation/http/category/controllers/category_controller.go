@@ -7,10 +7,12 @@ import (
 
 	categoryConstants "event-backend/app/category/constants"
 	categoryInterfaces "event-backend/app/category/interfaces"
+	roleConstants "event-backend/app/role/constants"
+	"event-backend/infrastructure/guards"
+	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
-	categoryDtos "event-backend/presentation/http/category/dtos"
-
 	uuidValidator "event-backend/infrastructure/validators"
+	categoryDtos "event-backend/presentation/http/category/dtos"
 )
 
 type CategoryController struct {
@@ -18,17 +20,18 @@ type CategoryController struct {
 }
 
 func NewCategoryController(router *gin.Engine, categoryService categoryInterfaces.CategoryServiceInterface) {
-	categoryRoute := router.Group("/api/v1/categories")
-
 	controller := &CategoryController{
 		categoryService: categoryService,
 	}
 
+	categoryRoute := router.Group("/api/v1/categories", middlewares.AuthorizationMiddleware())
 	categoryRoute.GET("", controller.Pagination())
-	categoryRoute.POST("", controller.Create())
 	categoryRoute.GET("/:id", controller.Detail())
-	categoryRoute.PUT("/:id", controller.Update())
-	categoryRoute.DELETE("/:id", controller.Delete())
+
+	protected := categoryRoute.Group("", guards.RoleGuard([]string{roleConstants.ADMIN}))
+	protected.POST("", controller.Create())
+	protected.PUT("/:id", controller.Update())
+	protected.DELETE("/:id", controller.Delete())
 }
 
 func (controller *CategoryController) Pagination() gin.HandlerFunc {
