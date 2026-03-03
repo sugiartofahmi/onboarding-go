@@ -50,3 +50,21 @@ func (auth *AuthQueryRepository) FindOneByEmailWithRole(ctx context.Context, ema
 
 	return &result
 }
+
+func (auth *AuthQueryRepository) IsExistsByEmail(ctx context.Context, email string) bool {
+	query := auth.userModel.WithContext(ctx)
+	var exists bool
+
+	err := query.
+		Select("1").
+		Where("email = ?", email).
+		Limit(1).
+		Scan(&exists).Error
+
+	if err != nil {
+		log.Println("Error check user exists by email:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return exists
+}
