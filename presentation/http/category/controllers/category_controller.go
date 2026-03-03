@@ -37,7 +37,7 @@ func NewCategoryController(router *gin.Engine, categoryService categoryInterface
 func (controller *CategoryController) Pagination() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := categoryDtos.AssignCategoryQueryRequestDTO(httpContext)
+		dto := categoryDtos.AssignCategoryQueryRequestDto(httpContext)
 		result := controller.categoryService.Pagination(ctx, dto)
 		meta := utils.PaginationMetaBuilder(dto.Page, dto.PerPage, int(result.Count))
 		items := categoryDtos.CategoryResponseDtoFromEntities(result.Data)
@@ -61,7 +61,7 @@ func (controller *CategoryController) Detail() gin.HandlerFunc {
 func (controller *CategoryController) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := &categoryDtos.CategoryCreateRequestDTO{}
+		dto := &categoryDtos.CategoryCreateRequestDto{}
 		httpContext.ShouldBindJSON(dto)
 		result := controller.categoryService.Create(ctx, dto)
 		response := utils.SuccessResponse(http.StatusCreated, categoryConstants.CATEGORY_CREATE_SUCCESS, categoryDtos.CategoryDetailResponseDtoFromEntity(*result))
@@ -74,7 +74,7 @@ func (controller *CategoryController) Update() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
-		dto := &categoryDtos.CategoryUpdateRequestDTO{}
+		dto := &categoryDtos.CategoryUpdateRequestDto{}
 		httpContext.ShouldBindJSON(dto)
 		dto.Id = id
 		result := controller.categoryService.Update(ctx, dto)

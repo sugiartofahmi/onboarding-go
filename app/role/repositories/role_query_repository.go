@@ -27,7 +27,7 @@ func NewRoleQueryRepository(db *gorm.DB) *RoleQueryRepository {
 	}
 }
 
-func (repo *RoleQueryRepository) Pagination(ctx context.Context, dto *roledtos.RoleQueryRequestDTO) *infradtos.PaginationResultDto[entities.RoleEntity] {
+func (repo *RoleQueryRepository) Pagination(ctx context.Context, dto *roledtos.RoleQueryRequestDto) *infradtos.PaginationResultDto[entities.RoleEntity] {
 	query := repo.roleModel.WithContext(ctx)
 	var results []*entities.RoleEntity
 	var total int64
@@ -130,14 +130,14 @@ func (repo *RoleQueryRepository) IsExistsByNameExcludeId(ctx context.Context, na
 	return exists
 }
 
-func (repo *RoleQueryRepository) QuerySearch(db *gorm.DB, dto *roledtos.RoleQueryRequestDTO) *gorm.DB {
+func (repo *RoleQueryRepository) QuerySearch(db *gorm.DB, dto *roledtos.RoleQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("name ILIKE ?", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (repo *RoleQueryRepository) QuerySort(db *gorm.DB, dto *roledtos.RoleQueryRequestDTO) *gorm.DB {
+func (repo *RoleQueryRepository) QuerySort(db *gorm.DB, dto *roledtos.RoleQueryRequestDto) *gorm.DB {
 	allowedSortFields := map[string]bool{
 		"name":       true,
 		"created_at": true,

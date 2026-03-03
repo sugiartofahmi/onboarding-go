@@ -30,7 +30,7 @@ func NewRoleService(
 	}
 }
 
-func (service *RoleService) Pagination(ctx context.Context, dto *roleDtos.RoleQueryRequestDTO) *infradtos.PaginationResultDto[entities.RoleEntity] {
+func (service *RoleService) Pagination(ctx context.Context, dto *roleDtos.RoleQueryRequestDto) *infradtos.PaginationResultDto[entities.RoleEntity] {
 	return service.roleQueryRepository.Pagination(ctx, dto)
 }
 
@@ -43,7 +43,7 @@ func (service *RoleService) Detail(ctx context.Context, id uuid.UUID) *entities.
 	return data
 }
 
-func (service *RoleService) Create(ctx context.Context, dto *roleDtos.RoleCreateRequestDTO) *entities.RoleEntity {
+func (service *RoleService) Create(ctx context.Context, dto *roleDtos.RoleCreateRequestDto) *entities.RoleEntity {
 	newRole := dto.ToEntity()
 	isExistsByName := service.roleQueryRepository.IsExistsByName(ctx, newRole.Name)
 
@@ -54,7 +54,7 @@ func (service *RoleService) Create(ctx context.Context, dto *roleDtos.RoleCreate
 	return service.roleStoreRepository.Create(ctx, newRole)
 }
 
-func (service *RoleService) Update(ctx context.Context, dto *roleDtos.RoleUpdateRequestDTO) *entities.RoleEntity {
+func (service *RoleService) Update(ctx context.Context, dto *roleDtos.RoleUpdateRequestDto) *entities.RoleEntity {
 	existingRole := service.roleQueryRepository.FindOneById(ctx, dto.Id)
 	if existingRole == nil {
 		panic(*exceptions.NotFoundException(roleConstants.ROLE_NOT_FOUND))

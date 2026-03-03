@@ -5,11 +5,11 @@ import (
 	"event-backend/infrastructure/utils"
 )
 
-type CategoryCreateRequestDTO struct {
+type CategoryCreateRequestDto struct {
 	Name string `json:"name" binding:"required,min=3,max=255"`
 }
 
-func (dto *CategoryCreateRequestDTO) ToEntity() *entities.CategoryEntity {
+func (dto *CategoryCreateRequestDto) ToEntity() *entities.CategoryEntity {
 	return &entities.CategoryEntity{
 		Name: dto.Name,
 		Slug: utils.GenerateSlug(dto.Name),

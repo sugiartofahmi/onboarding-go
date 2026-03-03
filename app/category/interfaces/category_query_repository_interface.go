@@ -11,7 +11,7 @@ import (
 )
 
 type CategoryQueryRepositoryInterface interface {
-	Pagination(ctx context.Context, dto *categorydtos.CategoryQueryRequestDTO) *infradtos.PaginationResultDto[entities.CategoryEntity]
+	Pagination(ctx context.Context, dto *categorydtos.CategoryQueryRequestDto) *infradtos.PaginationResultDto[entities.CategoryEntity]
 	FindOneById(ctx context.Context, id uuid.UUID) *entities.CategoryEntity
 	FindOneBySlug(ctx context.Context, slug string) *entities.CategoryEntity
 	IsExistsByName(ctx context.Context, name string) bool

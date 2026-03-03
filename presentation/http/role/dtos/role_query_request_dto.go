@@ -6,12 +6,12 @@ import (
 	infradtos "event-backend/infrastructure/dtos"
 )
 
-type RoleQueryRequestDTO struct {
+type RoleQueryRequestDto struct {
 	infradtos.PaginationQueryRequestDto
 }
 
-func AssignRoleQueryRequestDTO(c *gin.Context) *RoleQueryRequestDTO {
-	return &RoleQueryRequestDTO{
+func AssignRoleQueryRequestDto(c *gin.Context) *RoleQueryRequestDto {
+	return &RoleQueryRequestDto{
 		PaginationQueryRequestDto: *infradtos.AssignPaginationQueryRequestDto(c),
 	}
 }

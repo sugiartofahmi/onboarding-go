@@ -10,7 +10,7 @@ import (
 )
 
 type UserQueryRepositoryInterface interface {
-	Pagination(ctx context.Context, dto *userdtos.UserQueryRequestDTO) *infradtos.PaginationResultDto[entities.UserEntity]
+	Pagination(ctx context.Context, dto *userdtos.UserQueryRequestDto) *infradtos.PaginationResultDto[entities.UserEntity]
 	FindOneById(ctx context.Context, id uuid.UUID) *entities.UserEntity
 	FindOneByIdWithRole(ctx context.Context, id uuid.UUID) *entities.UserEntity
 	FindOneByEmail(ctx context.Context, email string) *entities.UserEntity
