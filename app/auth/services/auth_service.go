@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	authConstants "event-backend/app/auth/constants"
 	"event-backend/app/auth/interfaces"
 	roleConstants "event-backend/app/role/constants"
 	roleInterfaces "event-backend/app/role/interfaces"
@@ -31,12 +32,12 @@ func NewAuthService(
 func (service *AuthService) Login(ctx context.Context, request *authdtos.AuthLoginRequestDto) *authdtos.AuthLoginResponseDto {
 	user := service.authQueryRepository.FindOneByEmailWithRole(ctx, request.Email)
 	if user == nil {
-		panic(*exceptions.UnauthenticatedException("Credential not valid"))
+		panic(*exceptions.UnauthenticatedException(authConstants.AUTH_CREDENTIAL_NOT_VALID))
 	}
 
 	isPasswordValid := utils.ComparePassword(user.Password, request.Password)
 	if !isPasswordValid {
-		panic(*exceptions.UnauthenticatedException("Credential not valid"))
+		panic(*exceptions.UnauthenticatedException(authConstants.AUTH_CREDENTIAL_NOT_VALID))
 	}
 
 	token, expiresAt := utils.GenerateToken(user)
@@ -51,12 +52,12 @@ func (service *AuthService) Login(ctx context.Context, request *authdtos.AuthLog
 func (service *AuthService) Register(ctx context.Context, request *authdtos.AuthRegisterRequestDto) *authdtos.AuthRegisterResponseDto {
 	isEmailExists := service.authQueryRepository.IsExistsByEmail(ctx, request.Email)
 	if isEmailExists {
-		panic(*exceptions.UnprocessableEntityException("Email already exists"))
+		panic(*exceptions.UnprocessableEntityException(authConstants.AUTH_EMAIL_ALREADY_EXISTS))
 	}
 
 	role := service.roleQueryRepository.FindOneByName(ctx, roleConstants.ATTENDEE)
 	if role == nil {
-		panic(*exceptions.UnprocessableEntityException("Role not found"))
+		panic(*exceptions.UnprocessableEntityException(authConstants.AUTH_ROLE_NOT_FOUND))
 	}
 
 	user := request.ToEntity()
