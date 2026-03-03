@@ -36,6 +36,11 @@ import (
 
 	roleInterfaces "event-backend/app/role/interfaces"
 	roleRepositories "event-backend/app/role/repositories"
+
+	userInterfaces "event-backend/app/user/interfaces"
+	userRepositories "event-backend/app/user/repositories"
+	userServices "event-backend/app/user/services"
+	userControllers "event-backend/presentation/http/user/controllers"
 )
 
 var (
@@ -56,6 +61,9 @@ var (
 	authStoreRepository     authInterfaces.AuthStoreRepositoryInterface
 	authService             authInterfaces.AuthServiceInterface
 	roleQueryRepository     roleInterfaces.RoleQueryRepositoryInterface
+	userQueryRepository     userInterfaces.UserQueryRepositoryInterface
+	userStoreRepository     userInterfaces.UserStoreRepositoryInterface
+	userService             userInterfaces.UserServiceInterface
 )
 
 func main() {
@@ -151,16 +159,20 @@ func initializeRepositories() {
 	authQueryRepository = authRepositories.NewAuthQueryRepository(db)
 	authStoreRepository = authRepositories.NewAuthStoreRepository(db)
 	roleQueryRepository = roleRepositories.NewRoleQueryRepository(db)
+	userQueryRepository = userRepositories.NewUserQueryRepository(db)
+	userStoreRepository = userRepositories.NewUserStoreRepository(db)
 }
 
 func initializeServices() {
 	categoryService = categoryServices.NewCategoryService(categoryQueryRepository, categoryStoreRepository)
 	authService = authServices.NewAuthService(authQueryRepository, authStoreRepository, roleQueryRepository)
+	userService = userServices.NewUserService(userQueryRepository, userStoreRepository, roleQueryRepository)
 }
 
 func initializeControllers() {
 	categoryControllers.NewCategoryController(router, categoryService)
 	authControllers.NewAuthController(router, authService)
+	userControllers.NewUserController(router, userService)
 }
 
 func initializeHttpServer() {

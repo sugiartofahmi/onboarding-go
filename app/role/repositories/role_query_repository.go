@@ -6,6 +6,7 @@ import (
 	"event-backend/infrastructure/exceptions"
 	"log"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -34,4 +35,30 @@ func (repo *RoleQueryRepository) FindOneByName(ctx context.Context, name string)
 	}
 
 	return &result
+}
+
+func (repo *RoleQueryRepository) FindOneById(ctx context.Context, id uuid.UUID) *entities.RoleEntity {
+	query := repo.roleModel.WithContext(ctx)
+	var result entities.RoleEntity
+
+	err := query.Where("id = ?", id).First(&result).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	} else if err != nil {
+		log.Println("Error find role by id:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return &result
+}
+
+func (repo *RoleQueryRepository) IsExistsById(ctx context.Context, id uuid.UUID) bool {
+	query := repo.roleModel.WithContext(ctx)
+	var exists bool
+	err := query.Select("1").Where("id = ?", id).Scan(&exists).Error
+	if err != nil {
+		log.Println("Error check role exist by id:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+	return exists
 }
