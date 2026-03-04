@@ -3,6 +3,7 @@ package dtos
 import (
 	"time"
 
+	"event-backend/app/event/enums"
 	"event-backend/entities"
 
 	"github.com/google/uuid"
@@ -19,12 +20,14 @@ type EventResponseDto struct {
 	StartDate       time.Time `json:"start_date"`
 	EndDate         time.Time `json:"end_date"`
 	Status          int       `json:"status"`
+	StatusLabel     string    `json:"status_label"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 func EventResponseDtoFromEntities(entities []*entities.EventEntity) []EventResponseDto {
-	eventResponses := make([]EventResponseDto, len(entities))
+	totalEvents := len(entities)
+	eventResponses := make([]EventResponseDto, totalEvents)
 	for i, event := range entities {
 		eventResponses[i] = EventResponseDto{
 			Id:              event.Id,
@@ -37,27 +40,11 @@ func EventResponseDtoFromEntities(entities []*entities.EventEntity) []EventRespo
 			StartDate:       event.StartDate,
 			EndDate:         event.EndDate,
 			Status:          event.Status,
+			StatusLabel:     enums.EventStatusEnum(event.Status).GetLabel(),
 			CreatedAt:       event.CreatedAt,
 			UpdatedAt:       event.UpdatedAt,
 		}
 	}
 
 	return eventResponses
-}
-
-func EventDetailResponseDtoFromEntity(entity entities.EventEntity) EventResponseDto {
-	return EventResponseDto{
-		Id:              entity.Id,
-		OrganizerUserId: entity.OrganizerUserId,
-		CategoryId:      entity.CategoryId,
-		Title:           entity.Title,
-		Slug:            entity.Slug,
-		Description:     entity.Description,
-		Location:        entity.Location,
-		StartDate:       entity.StartDate,
-		EndDate:         entity.EndDate,
-		Status:          entity.Status,
-		CreatedAt:       entity.CreatedAt,
-		UpdatedAt:       entity.UpdatedAt,
-	}
 }
