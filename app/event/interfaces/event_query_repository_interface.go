@@ -14,6 +14,7 @@ type EventQueryRepositoryInterface interface {
 	Pagination(ctx context.Context, dto *eventdtos.EventQueryRequestDto) *infradtos.PaginationResultDto[entities.EventEntity]
 	FindOneById(ctx context.Context, id uuid.UUID) *entities.EventEntity
 	FindOneBySlug(ctx context.Context, slug string) *entities.EventEntity
+	FindOneByIdWithTickets(ctx context.Context, id uuid.UUID) *entities.EventEntity
 	IsExistsByTitle(ctx context.Context, title string) bool
 	IsExistsByTitleExcludeId(ctx context.Context, title string, excludeID uuid.UUID) bool
 	IsExistsBySlug(ctx context.Context, slug string) bool

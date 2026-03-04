@@ -83,6 +83,21 @@ func (repo *EventQueryRepository) FindOneBySlug(ctx context.Context, slug string
 	return &result
 }
 
+func (repo *EventQueryRepository) FindOneByIdWithTickets(ctx context.Context, id uuid.UUID) *entities.EventEntity {
+	query := repo.eventModel.WithContext(ctx)
+	var result entities.EventEntity
+
+	err := query.Preload("Tickets").Where("id = ?", id).First(&result).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	} else if err != nil {
+		log.Println("Error find event by id with tickets:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return &result
+}
+
 func (repo *EventQueryRepository) IsExistsByTitle(ctx context.Context, title string) bool {
 	query := repo.eventModel.WithContext(ctx)
 	var exists bool
