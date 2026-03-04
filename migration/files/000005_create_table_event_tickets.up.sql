@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS public.event_tickets (
     updated_by       uuid,
     deleted_by       uuid,
     CONSTRAINT event_tickets_pkey          PRIMARY KEY (id),
-    CONSTRAINT uq_event_tickets_event_type UNIQUE (event_id, type),
     CONSTRAINT fk_event_tickets_event_id   FOREIGN KEY (event_id) REFERENCES public.events (id) ON DELETE CASCADE
 );
 
