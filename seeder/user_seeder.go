@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
 	"event-backend/entities"
@@ -44,13 +43,11 @@ func (s *UserSeeder) Handle(db *gorm.DB) error {
 			continue
 		}
 
-		hashed := hashPassword(row.Password)
-
 		user := entities.UserEntity{
 			RoleId:   role.Id,
 			Name:     row.Name,
 			Email:    row.Email,
-			Password: hashed,
+			Password: row.Password, // Will be hashed by BeforeCreate hook
 		}
 		if err := db.Create(&user).Error; err != nil {
 			return err
@@ -61,10 +58,3 @@ func (s *UserSeeder) Handle(db *gorm.DB) error {
 	return nil
 }
 
-func hashPassword(password string) string {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		panic(err)
-	}
-	return string(hash)
-}
