@@ -44,8 +44,15 @@ func createPanicException(err interface{}) exceptions.Exception {
 		return ex
 	}
 
+	errMsg := "Internal Server Error"
+	if e, ok := err.(error); ok {
+		errMsg = e.Error()
+	} else if s, ok := err.(string); ok {
+		errMsg = s
+	}
+
 	return exceptions.Exception{
-		ErrorMessage: err.(error).Error(),
+		ErrorMessage: errMsg,
 		StatusCode:   http.StatusInternalServerError,
 	}
 }
