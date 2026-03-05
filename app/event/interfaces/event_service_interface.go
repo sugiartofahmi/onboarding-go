@@ -13,7 +13,7 @@ import (
 type EventServiceInterface interface {
 	Pagination(ctx context.Context, dto *eventdtos.EventQueryRequestDto) *infradtos.PaginationResultDto[entities.EventEntity]
 	Detail(ctx context.Context, id uuid.UUID) *entities.EventEntity
-	Create(ctx context.Context, dto *eventdtos.EventCreateRequestDto, organizerUserId uuid.UUID) *entities.EventEntity
-	Update(ctx context.Context, dto *eventdtos.EventUpdateRequestDto, currentUserId uuid.UUID) *entities.EventEntity
+	Create(ctx context.Context, dto *eventdtos.EventCreateRequestDto) *entities.EventEntity
+	Update(ctx context.Context, dto *eventdtos.EventUpdateRequestDto) *entities.EventEntity
 	SoftDelete(ctx context.Context, id uuid.UUID, currentUserId uuid.UUID)
 }

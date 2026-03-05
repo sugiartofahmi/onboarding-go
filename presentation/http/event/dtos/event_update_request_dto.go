@@ -25,6 +25,7 @@ type EventUpdateRequestDto struct {
 	EndDate     time.Time                     `json:"end_date" binding:"required"`
 	Tickets     []EventTicketUpdateRequestDto `json:"tickets" binding:"required,min=1,dive"`
 	Id          uuid.UUID                     `json:"-"`
+	UpdatedBy   *uuid.UUID                    `json:"-"`
 }
 
 func (dto *EventUpdateRequestDto) ToEntity(existingEntity *entities.EventEntity) *entities.EventEntity {
@@ -35,17 +36,20 @@ func (dto *EventUpdateRequestDto) ToEntity(existingEntity *entities.EventEntity)
 	existingEntity.Location = dto.Location
 	existingEntity.StartDate = dto.StartDate
 	existingEntity.EndDate = dto.EndDate
+	existingEntity.UpdatedBy = dto.UpdatedBy
 	return existingEntity
 }
 
 func (dto *EventUpdateRequestDto) ToTicketEntities(eventId uuid.UUID) []entities.EventTicketEntity {
-	tickets := make([]entities.EventTicketEntity, len(dto.Tickets))
-	for i, dto := range dto.Tickets {
+	dtoTickets := dto.Tickets
+	tickets := make([]entities.EventTicketEntity, len(dtoTickets))
+	for i, dtoTicket := range dtoTickets {
 		tickets[i] = entities.EventTicketEntity{
 			EventId: eventId,
-			Type:    dto.Type,
-			Price:   dto.Price,
-			Quota:   dto.Quota,
+			Type:    dtoTicket.Type,
+			Price:   dtoTicket.Price,
+			Quota:   dtoTicket.Quota,
+			UpdatedBy: dto.UpdatedBy,
 		}
 	}
 	return tickets

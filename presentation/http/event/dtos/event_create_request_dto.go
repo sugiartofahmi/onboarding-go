@@ -26,6 +26,7 @@ type EventCreateRequestDto struct {
 	StartDate   time.Time                     `json:"start_date" binding:"required"`
 	EndDate     time.Time                     `json:"end_date" binding:"required"`
 	Tickets     []EventTicketCreateRequestDto `json:"tickets" binding:"required,min=1,dive"`
+	CreatedBy   *uuid.UUID					  `json:"-"`
 }
 
 func (dto *EventCreateRequestDto) ToEntity() *entities.EventEntity {
@@ -39,17 +40,20 @@ func (dto *EventCreateRequestDto) ToEntity() *entities.EventEntity {
 		StartDate:       dto.StartDate,
 		EndDate:         dto.EndDate,
 		Status:          int(eventStatusEnum.Draft), // Default status is Draft when creating a new event
+		CreatedBy:       dto.CreatedBy,
 	}
 }
 
 func (dto *EventCreateRequestDto) ToTicketEntities(eventId uuid.UUID) []entities.EventTicketEntity {
-	tickets := make([]entities.EventTicketEntity, len(dto.Tickets))
-	for i, dto := range dto.Tickets {
+	dtoTickets := dto.Tickets
+	tickets := make([]entities.EventTicketEntity, len(dtoTickets))
+	for i, dtoTicket := range dtoTickets {
 		tickets[i] = entities.EventTicketEntity{
 			EventId: eventId,
-			Type:    dto.Type,
-			Price:   dto.Price,
-			Quota:   dto.Quota,
+			Type:    dtoTicket.Type,
+			Price:   dtoTicket.Price,
+			Quota:   dtoTicket.Quota,
+			CreatedBy: dto.CreatedBy,
 		}
 	}
 	return tickets

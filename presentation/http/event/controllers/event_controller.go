@@ -7,7 +7,9 @@ import (
 
 	eventConstants "event-backend/app/event/constants"
 	eventInterfaces "event-backend/app/event/interfaces"
+	roleConstants "event-backend/app/role/constants"
 	"event-backend/infrastructure/constants"
+	guards "event-backend/infrastructure/guards"
 	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
 	uuidValidator "event-backend/infrastructure/validators"
@@ -23,11 +25,11 @@ func NewEventController(router *gin.Engine, eventService eventInterfaces.EventSe
 		eventService: eventService,
 	}
 
-	eventRoute := router.Group("/api/v1/events")
+	eventRoute := router.Group("/api/v1/events", middlewares.AuthorizationMiddleware())
 	eventRoute.GET("", controller.Pagination())
 	eventRoute.GET("/:id", controller.Detail())
 
-	organizerRoute := eventRoute.Group("", middlewares.AuthorizationMiddleware())
+	organizerRoute := eventRoute.Group("", guards.RoleGuard([]string{roleConstants.ADMIN}))
 	organizerRoute.POST("", controller.Create())
 	organizerRoute.PUT("/:id", controller.Update())
 	organizerRoute.DELETE("/:id", controller.Delete())
@@ -63,8 +65,10 @@ func (controller *EventController) Create() gin.HandlerFunc {
 		dto := &eventDtos.EventCreateRequestDto{}
 		httpContext.ShouldBindJSON(dto)
 
-		userClaims := httpContext.MustGet(constants.AuthUserKey).(*utils.JWTClaims)
-		result := controller.eventService.Create(ctx, dto, userClaims.User.Id)
+		currentUserId := utils.GetAuthUserId(httpContext)
+		dto.CreatedBy = &currentUserId
+
+		result := controller.eventService.Create(ctx, dto)
 		response := utils.SuccessResponse(http.StatusCreated, eventConstants.EVENT_CREATE_SUCCESS, eventDtos.EventDetailResponseDtoFromEntity(*result))
 
 		httpContext.JSON(http.StatusCreated, response)
@@ -77,10 +81,12 @@ func (controller *EventController) Update() gin.HandlerFunc {
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
 		dto := &eventDtos.EventUpdateRequestDto{}
 		httpContext.ShouldBindJSON(dto)
+
+		currentUserId := utils.GetAuthUserId(httpContext)
+		dto.UpdatedBy = &currentUserId
 		dto.Id = id
 
-		userClaims := httpContext.MustGet(constants.AuthUserKey).(*utils.JWTClaims)
-		result := controller.eventService.Update(ctx, dto, userClaims.User.Id)
+		result := controller.eventService.Update(ctx, dto)
 		response := utils.SuccessResponse(http.StatusOK, eventConstants.EVENT_UPDATE_SUCCESS, eventDtos.EventDetailResponseDtoFromEntity(*result))
 
 		httpContext.JSON(http.StatusOK, response)
@@ -92,8 +98,8 @@ func (controller *EventController) Delete() gin.HandlerFunc {
 		ctx := httpContext.Request.Context()
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
 
-		userClaims := httpContext.MustGet(constants.AuthUserKey).(*utils.JWTClaims)
-		controller.eventService.SoftDelete(ctx, id, userClaims.User.Id)
+		userClaims := httpContext.MustGet(constants.AuthUserKey).(utils.JWTUser)
+		controller.eventService.SoftDelete(ctx, id, userClaims.Id)
 		response := utils.SuccessResponse(http.StatusOK, eventConstants.EVENT_DELETE_SUCCESS, nil)
 
 		httpContext.JSON(http.StatusOK, response)
