@@ -11,7 +11,7 @@ type EventQueryRequestDto struct {
 }
 
 func AssignEventQueryRequestDto(c *gin.Context) *EventQueryRequestDto {
-	return &EventQueryRequestDto{
-		PaginationQueryRequestDto: *infradtos.AssignPaginationQueryRequestDto(c),
-	}
+	q := &EventQueryRequestDto{}
+	c.ShouldBindQuery(q)
+	return q
 }
