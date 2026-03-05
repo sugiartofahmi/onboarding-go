@@ -12,9 +12,7 @@ var once sync.Once
 
 func LoadConfig() {
 	once.Do(func() {
-		if err := godotenv.Load(); err != nil {
-			log.Fatalf("failed to load .env file: %v", err)
-		}
+		godotenv.Load()
 	})
 }
 
