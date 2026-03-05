@@ -88,9 +88,9 @@ func (service *EventService) Update(ctx context.Context, dto *eventDtos.EventUpd
 	}
 
 
-	// if existingEvent.OrganizerUserId != currentUserId {
-		// panic(*exceptions.ForbiddenException(eventConstants.EVENT_NOT_OWNER))
-	// }
+	if existingEvent.OrganizerUserId != *dto.UpdatedBy {
+		panic(*exceptions.ForbiddenException(eventConstants.EVENT_NOT_OWNER))
+	}
 
 	categoryExists := service.categoryQueryRepository.FindOneById(ctx, dto.CategoryId)
 	if categoryExists == nil {
