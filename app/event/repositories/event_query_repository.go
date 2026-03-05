@@ -32,8 +32,9 @@ func (repo *EventQueryRepository) Pagination(ctx context.Context, dto *eventdtos
 	var results []*entities.EventEntity
 	var total int64
 
-	query = repo.QuerySearch(query, dto)
-	query = repo.QuerySort(query, dto)
+	query = repo.querySearch(query, dto)
+	query = repo.querySort(query, dto)
+	query = repo.queryFilter(query, dto)
 
 	err := query.Count(&total).Error
 	if err != nil {
@@ -188,14 +189,14 @@ func (repo *EventQueryRepository) IsExistsByCategoryId(ctx context.Context, cate
 	return exists
 }
 
-func (repo *EventQueryRepository) QuerySearch(db *gorm.DB, dto *eventdtos.EventQueryRequestDto) *gorm.DB {
+func (repo *EventQueryRepository) querySearch(db *gorm.DB, dto *eventdtos.EventQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("title ILIKE ?", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (repo *EventQueryRepository) QuerySort(db *gorm.DB, dto *eventdtos.EventQueryRequestDto) *gorm.DB {
+func (repo *EventQueryRepository) querySort(db *gorm.DB, dto *eventdtos.EventQueryRequestDto) *gorm.DB {
 	allowedSortFields := map[string]bool{
 		"title":      true,
 		"start_date": true,
@@ -214,4 +215,14 @@ func (repo *EventQueryRepository) QuerySort(db *gorm.DB, dto *eventdtos.EventQue
 	}
 
 	return db.Order(sortBy + " " + order)
+}
+
+func (repo *EventQueryRepository) queryFilter(db *gorm.DB, dto *eventdtos.EventQueryRequestDto) *gorm.DB {
+	if dto.CategoryId != nil {
+		db = db.Where("category_id = ?", *dto.CategoryId)
+	}
+	if dto.Status != nil {
+		db = db.Where("status = ?", *dto.Status)
+	}
+	return db
 }

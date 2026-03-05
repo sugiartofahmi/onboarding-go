@@ -30,3 +30,7 @@ func GetAuthUserId(c *gin.Context) uuid.UUID {
 func GetAuthRoleId(c *gin.Context) uuid.UUID {
 	return GetAuthUser(c).RoleId
 }
+
+func GetAuthUserRoleName(c *gin.Context) string {
+	return GetAuthUser(c).RoleName
+}
