@@ -3,11 +3,9 @@ package utils
 import (
 	"event-backend/entities"
 	"event-backend/infrastructure/config"
-	infraConstants "event-backend/infrastructure/constants"
 	"event-backend/infrastructure/exceptions"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -69,26 +67,4 @@ func ValidateToken(tokenString string) *JWTClaims {
 	}
 
 	return claims
-}
-
-func GetAuthUser(c *gin.Context) JWTUser {
-	value, exists := c.Get(infraConstants.AuthUserKey)
-	if !exists {
-		panic(*exceptions.UnauthenticatedException("unauthenticated"))
-	}
-
-	user, ok := value.(JWTUser)
-	if !ok {
-		panic(*exceptions.UnauthenticatedException("invalid auth user in context"))
-	}
-
-	return user
-}
-
-func GetAuthUserId(c *gin.Context) uuid.UUID {
-	return GetAuthUser(c).Id
-}
-
-func GetAuthRoleId(c *gin.Context) uuid.UUID {
-	return GetAuthUser(c).RoleId
 }
