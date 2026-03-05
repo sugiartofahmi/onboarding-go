@@ -236,8 +236,15 @@ func (repo *EventQueryRepository) queryFilter(db *gorm.DB, dto *eventdtos.EventQ
 	if dto.CategoryId != nil {
 		db = db.Where("category_id = ?", *dto.CategoryId)
 	}
+
 	if dto.Status != nil {
 		db = db.Where("status = ?", *dto.Status)
 	}
+
+	// Filter by date range (start_date and end_date)
+	if dto.StartDate != nil && dto.EndDate != nil {
+		db = db.Where("start_date >= ? AND end_date <= ?", *dto.StartDate, *dto.EndDate)
+	}
+
 	return db
 }
