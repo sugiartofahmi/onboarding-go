@@ -31,7 +31,22 @@ func (repo *EventQueryRepository) Pagination(ctx context.Context, dto *eventdtos
 	query := repo.eventModel.WithContext(ctx)
 	var results []*entities.EventEntity
 	var total int64
+	var eventPaginationColumns = []string{
+	    "id",
+	    "organizer_user_id",
+	    "category_id",
+	    "title",
+	    "slug",
+	    "description",
+	    "location",
+	    "start_date",
+	    "end_date",
+	    "status",
+	    "created_at",
+	    "updated_at",
+	}
 
+	query = query.Select(eventPaginationColumns)
 	query = repo.querySearch(query, dto)
 	query = repo.querySort(query, dto)
 	query = repo.queryFilter(query, dto)
@@ -41,8 +56,8 @@ func (repo *EventQueryRepository) Pagination(ctx context.Context, dto *eventdtos
 		log.Println("Error count events:", err)
 		panic(*exceptions.ServerErrorException(err))
 	}
-
-	err = query.Session(&gorm.Session{}).Scopes(utils.Paginate(&dto.PaginationQueryRequestDto)).Find(&results).Error
+	paginate := utils.Paginate(&dto.PaginationQueryRequestDto)
+	err = query.Session(&gorm.Session{}).Scopes(paginate).Find(&results).Error
 	if err != nil {
 		log.Println("Error find events:", err)
 		panic(*exceptions.ServerErrorException(err))
