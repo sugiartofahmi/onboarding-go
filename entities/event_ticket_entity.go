@@ -10,7 +10,7 @@ import (
 type EventTicketEntity struct {
 	Id              uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"                                                        json:"id"`
 	EventId         uuid.UUID      `gorm:"type:uuid;not null;index:idx_event_tickets_event_id;uniqueIndex:uq_event_tickets_event_type,priority:1" json:"event_id"`
-	Type            int            `gorm:"not null;uniqueIndex:uq_event_tickets_event_type,priority:2"                                            json:"type"`
+	Type            int            `gorm:"type:smallint;not null"                                            													  json:"type"`
 	Price           float64        `gorm:"type:decimal(12,2);not null"                                                                            json:"price"`
 	Quota           int            `gorm:"not null"                                                                                               json:"quota"`
 	RegisteredCount int            `gorm:"not null;default:0"                                                                                     json:"registered_count"`

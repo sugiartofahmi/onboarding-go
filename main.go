@@ -39,6 +39,11 @@ import (
 	roleServices "event-backend/app/role/services"
 	roleControllers "event-backend/presentation/http/role/controllers"
 
+	eventInterfaces "event-backend/app/event/interfaces"
+	eventRepositories "event-backend/app/event/repositories"
+	eventServices "event-backend/app/event/services"
+	eventControllers "event-backend/presentation/http/event/controllers"
+
 	userInterfaces "event-backend/app/user/interfaces"
 	userRepositories "event-backend/app/user/repositories"
 	userServices "event-backend/app/user/services"
@@ -46,28 +51,33 @@ import (
 )
 
 var (
-	router                  *gin.Engine
-	db                      *gorm.DB
-	redisCache              redisInterfaces.RedisCacheInterface
-	redisLock               redisInterfaces.RedisDistributedLockInterface
-	execMigration           *string
-	flagMigration           *string
-	migrationFileName       *string
-	runSeeder               *string
-	flagSeeder              *string
-	seederClass             *string
-	categoryQueryRepository categoryInterfaces.CategoryQueryRepositoryInterface
-	categoryStoreRepository categoryInterfaces.CategoryStoreRepositoryInterface
-	categoryService         categoryInterfaces.CategoryServiceInterface
-	authQueryRepository     authInterfaces.AuthQueryRepositoryInterface
-	authStoreRepository     authInterfaces.AuthStoreRepositoryInterface
-	authService             authInterfaces.AuthServiceInterface
-	roleQueryRepository     roleInterfaces.RoleQueryRepositoryInterface
-	roleStoreRepository     roleInterfaces.RoleStoreRepositoryInterface
-	roleService             roleInterfaces.RoleServiceInterface
-	userQueryRepository     userInterfaces.UserQueryRepositoryInterface
-	userStoreRepository     userInterfaces.UserStoreRepositoryInterface
-	userService             userInterfaces.UserServiceInterface
+	router                     *gin.Engine
+	db                         *gorm.DB
+	redisCache                 redisInterfaces.RedisCacheInterface
+	redisLock                  redisInterfaces.RedisDistributedLockInterface
+	execMigration              *string
+	flagMigration              *string
+	migrationFileName          *string
+	runSeeder                  *string
+	flagSeeder                 *string
+	seederClass                *string
+	categoryQueryRepository    categoryInterfaces.CategoryQueryRepositoryInterface
+	categoryStoreRepository    categoryInterfaces.CategoryStoreRepositoryInterface
+	categoryService            categoryInterfaces.CategoryServiceInterface
+	authQueryRepository        authInterfaces.AuthQueryRepositoryInterface
+	authStoreRepository        authInterfaces.AuthStoreRepositoryInterface
+	authService                authInterfaces.AuthServiceInterface
+	roleQueryRepository        roleInterfaces.RoleQueryRepositoryInterface
+	roleStoreRepository        roleInterfaces.RoleStoreRepositoryInterface
+	roleService                roleInterfaces.RoleServiceInterface
+	eventQueryRepository       eventInterfaces.EventQueryRepositoryInterface
+	eventStoreRepository       eventInterfaces.EventStoreRepositoryInterface
+	eventTicketQueryRepository eventInterfaces.EventTicketQueryRepositoryInterface
+	eventTicketStoreRepository eventInterfaces.EventTicketStoreRepositoryInterface
+	eventService               eventInterfaces.EventServiceInterface
+	userQueryRepository        userInterfaces.UserQueryRepositoryInterface
+	userStoreRepository        userInterfaces.UserStoreRepositoryInterface
+	userService                userInterfaces.UserServiceInterface
 )
 
 func main() {
@@ -164,6 +174,10 @@ func initializeRepositories() {
 	authStoreRepository = authRepositories.NewAuthStoreRepository(db)
 	roleQueryRepository = roleRepositories.NewRoleQueryRepository(db)
 	roleStoreRepository = roleRepositories.NewRoleStoreRepository(db)
+	eventQueryRepository = eventRepositories.NewEventQueryRepository(db)
+	eventStoreRepository = eventRepositories.NewEventStoreRepository(db)
+	eventTicketQueryRepository = eventRepositories.NewEventTicketQueryRepository(db)
+	eventTicketStoreRepository = eventRepositories.NewEventTicketStoreRepository(db)
 	userQueryRepository = userRepositories.NewUserQueryRepository(db)
 	userStoreRepository = userRepositories.NewUserStoreRepository(db)
 }
@@ -172,6 +186,7 @@ func initializeServices() {
 	categoryService = categoryServices.NewCategoryService(categoryQueryRepository, categoryStoreRepository)
 	authService = authServices.NewAuthService(authQueryRepository, authStoreRepository, roleQueryRepository)
 	roleService = roleServices.NewRoleService(roleQueryRepository, roleStoreRepository)
+	eventService = eventServices.NewEventService(db, eventQueryRepository, eventStoreRepository, eventTicketQueryRepository, eventTicketStoreRepository, categoryQueryRepository)
 	userService = userServices.NewUserService(userQueryRepository, userStoreRepository, roleQueryRepository)
 }
 
@@ -179,6 +194,7 @@ func initializeControllers() {
 	categoryControllers.NewCategoryController(router, categoryService)
 	authControllers.NewAuthController(router, authService)
 	roleControllers.NewRoleController(router, roleService)
+	eventControllers.NewEventController(router, eventService)
 	userControllers.NewUserController(router, userService)
 }
 

@@ -17,7 +17,7 @@ type EventEntity struct {
 	Location        *string        `gorm:"size:255"                                                                                                                                       json:"location,omitempty"`
 	StartDate       time.Time      `gorm:"not null;index:idx_events_status_start_date,priority:2"                                                                                         json:"start_date"`
 	EndDate         time.Time      `gorm:"not null"                                                                                                                                       json:"end_date"`
-	Status          int            `gorm:"not null;index:idx_events_status_start_date,priority:1;index:idx_events_organizer_status,priority:2;index:idx_events_category_status,priority:2" json:"status"`
+	Status          int            `gorm:"not null;default:1;index:idx_events_status_start_date,priority:1;index:idx_events_organizer_status,priority:2;index:idx_events_category_status,priority:2" json:"status"`
 	CreatedAt       time.Time      `gorm:"autoCreateTime"                                                                                                                                 json:"created_at"`
 	UpdatedAt       time.Time      `gorm:"autoUpdateTime"                                                                                                                                 json:"updated_at"`
 	DeletedAt       gorm.DeletedAt `gorm:"index"                                                                                                                                          json:"deleted_at,omitempty"`

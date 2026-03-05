@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.events (
     location          varchar(255),
     start_date        timestamptz                             NOT NULL,
     end_date          timestamptz                             NOT NULL,
-    status            integer                                 NOT NULL,
+    status            integer                                 NOT NULL DEFAULT 1,
     created_at        timestamptz  DEFAULT CURRENT_TIMESTAMP,
     updated_at        timestamptz  DEFAULT CURRENT_TIMESTAMP,
     deleted_at        timestamptz,
