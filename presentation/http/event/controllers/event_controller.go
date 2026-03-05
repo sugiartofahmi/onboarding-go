@@ -29,7 +29,7 @@ func NewEventController(router *gin.Engine, eventService eventInterfaces.EventSe
 	eventRoute.GET("", controller.Pagination())
 	eventRoute.GET("/:id", controller.Detail())
 
-	organizerRoute := eventRoute.Group("", guards.RoleGuard([]string{roleConstants.ADMIN}))
+	organizerRoute := eventRoute.Group("", guards.RoleGuard([]string{roleConstants.ORGANIZER}))
 	organizerRoute.POST("", controller.Create())
 	organizerRoute.PUT("/:id", controller.Update())
 	organizerRoute.DELETE("/:id", controller.Delete())
