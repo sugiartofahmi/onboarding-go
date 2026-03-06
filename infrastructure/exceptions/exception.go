@@ -49,6 +49,14 @@ func NotFoundException(message string) *Exception {
 	}
 }
 
+// 409 Conflict
+func ConflictException(message string) *Exception {
+	return &Exception{
+		ErrorMessage: message,
+		StatusCode:   http.StatusConflict,
+	}
+}
+
 // 422 Unprocessable Entity
 func UnprocessableEntityException(message string) *Exception {
 	return &Exception{
