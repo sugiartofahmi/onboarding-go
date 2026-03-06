@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS public.event_registrations (
     updated_by      uuid,
     deleted_by      uuid,
     CONSTRAINT event_registrations_pkey                  PRIMARY KEY (id),
-    CONSTRAINT uq_event_registrations_user_ticket        UNIQUE (user_id, event_ticket_id),
     CONSTRAINT fk_event_registrations_user_id            FOREIGN KEY (user_id)         REFERENCES public.users (id)         ON DELETE CASCADE,
     CONSTRAINT fk_event_registrations_event_id           FOREIGN KEY (event_id)       REFERENCES public.events (id)        ON DELETE CASCADE,
     CONSTRAINT fk_event_registrations_event_ticket_id    FOREIGN KEY (event_ticket_id) REFERENCES public.event_tickets (id) ON DELETE CASCADE
