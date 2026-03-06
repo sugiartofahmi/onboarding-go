@@ -89,3 +89,27 @@ func (repo *EventTicketStoreRepository) BulkDelete(ctx context.Context, entities
 		panic(*exceptions.ServerErrorException(err))
 	}
 }
+
+func (repo *EventTicketStoreRepository) IncrementRegisteredCount(ctx context.Context, ticketId uuid.UUID, count int) error {
+	query := repo.eventTicketModel.WithContext(ctx)
+
+	err := query.Where("id = ?", ticketId).UpdateColumn("registered_count", gorm.Expr("registered_count + ?", count)).Error
+	if err != nil {
+		log.Println("Error increment registered count:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return nil
+}
+
+func (repo *EventTicketStoreRepository) DecrementRegisteredCount(ctx context.Context, ticketId uuid.UUID, count int) error {
+	query := repo.eventTicketModel.WithContext(ctx)
+
+	err := query.Where("id = ?", ticketId).UpdateColumn("registered_count", gorm.Expr("registered_count - ?", count)).Error
+	if err != nil {
+		log.Println("Error decrement registered count:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return nil
+}
