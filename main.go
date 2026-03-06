@@ -48,36 +48,45 @@ import (
 	userRepositories "event-backend/app/user/repositories"
 	userServices "event-backend/app/user/services"
 	userControllers "event-backend/presentation/http/user/controllers"
+
+	eventregistrationInterfaces "event-backend/app/event_registration/interfaces"
+	eventregistrationRepoInterfaces "event-backend/app/event_registration/interfaces/repositories"
+	eventregistrationRepositories "event-backend/app/event_registration/repositories"
+	eventregistrationServices "event-backend/app/event_registration/services"
+	eventregistrationControllers "event-backend/presentation/http/event_registration/controllers"
 )
 
 var (
-	router                     *gin.Engine
-	db                         *gorm.DB
-	redisCache                 redisInterfaces.RedisCacheInterface
-	redisLock                  redisInterfaces.RedisDistributedLockInterface
-	execMigration              *string
-	flagMigration              *string
-	migrationFileName          *string
-	runSeeder                  *string
-	flagSeeder                 *string
-	seederClass                *string
-	categoryQueryRepository    categoryInterfaces.CategoryQueryRepositoryInterface
-	categoryStoreRepository    categoryInterfaces.CategoryStoreRepositoryInterface
-	categoryService            categoryInterfaces.CategoryServiceInterface
-	authQueryRepository        authInterfaces.AuthQueryRepositoryInterface
-	authStoreRepository        authInterfaces.AuthStoreRepositoryInterface
-	authService                authInterfaces.AuthServiceInterface
-	roleQueryRepository        roleInterfaces.RoleQueryRepositoryInterface
-	roleStoreRepository        roleInterfaces.RoleStoreRepositoryInterface
-	roleService                roleInterfaces.RoleServiceInterface
-	eventQueryRepository       eventInterfaces.EventQueryRepositoryInterface
-	eventStoreRepository       eventInterfaces.EventStoreRepositoryInterface
-	eventTicketQueryRepository eventInterfaces.EventTicketQueryRepositoryInterface
-	eventTicketStoreRepository eventInterfaces.EventTicketStoreRepositoryInterface
-	eventService               eventInterfaces.EventServiceInterface
-	userQueryRepository        userInterfaces.UserQueryRepositoryInterface
-	userStoreRepository        userInterfaces.UserStoreRepositoryInterface
-	userService                userInterfaces.UserServiceInterface
+	router                           *gin.Engine
+	db                               *gorm.DB
+	redisCache                       redisInterfaces.RedisCacheInterface
+	redisLock                        redisInterfaces.RedisDistributedLockInterface
+	execMigration                    *string
+	flagMigration                    *string
+	migrationFileName                *string
+	runSeeder                        *string
+	flagSeeder                       *string
+	seederClass                      *string
+	categoryQueryRepository          categoryInterfaces.CategoryQueryRepositoryInterface
+	categoryStoreRepository          categoryInterfaces.CategoryStoreRepositoryInterface
+	categoryService                  categoryInterfaces.CategoryServiceInterface
+	authQueryRepository              authInterfaces.AuthQueryRepositoryInterface
+	authStoreRepository              authInterfaces.AuthStoreRepositoryInterface
+	authService                      authInterfaces.AuthServiceInterface
+	roleQueryRepository              roleInterfaces.RoleQueryRepositoryInterface
+	roleStoreRepository              roleInterfaces.RoleStoreRepositoryInterface
+	roleService                      roleInterfaces.RoleServiceInterface
+	eventQueryRepository             eventInterfaces.EventQueryRepositoryInterface
+	eventStoreRepository             eventInterfaces.EventStoreRepositoryInterface
+	eventTicketQueryRepository       eventInterfaces.EventTicketQueryRepositoryInterface
+	eventTicketStoreRepository       eventInterfaces.EventTicketStoreRepositoryInterface
+	eventService                     eventInterfaces.EventServiceInterface
+	userQueryRepository              userInterfaces.UserQueryRepositoryInterface
+	userStoreRepository              userInterfaces.UserStoreRepositoryInterface
+	userService                      userInterfaces.UserServiceInterface
+	eventRegistrationQueryRepository eventregistrationRepoInterfaces.EventRegistrationQueryRepositoryInterface
+	eventRegistrationStoreRepository eventregistrationRepoInterfaces.EventRegistrationStoreRepositoryInterface
+	eventRegistrationService         eventregistrationInterfaces.EventRegistrationServiceInterface
 )
 
 func main() {
@@ -180,6 +189,8 @@ func initializeRepositories() {
 	eventTicketStoreRepository = eventRepositories.NewEventTicketStoreRepository(db)
 	userQueryRepository = userRepositories.NewUserQueryRepository(db)
 	userStoreRepository = userRepositories.NewUserStoreRepository(db)
+	eventRegistrationQueryRepository = eventregistrationRepositories.NewEventRegistrationQueryRepository(db)
+	eventRegistrationStoreRepository = eventregistrationRepositories.NewEventRegistrationStoreRepository(db)
 }
 
 func initializeServices() {
@@ -188,6 +199,7 @@ func initializeServices() {
 	roleService = roleServices.NewRoleService(roleQueryRepository, roleStoreRepository)
 	eventService = eventServices.NewEventService(db, eventQueryRepository, eventStoreRepository, eventTicketQueryRepository, eventTicketStoreRepository, categoryQueryRepository)
 	userService = userServices.NewUserService(userQueryRepository, userStoreRepository, roleQueryRepository)
+	eventRegistrationService = eventregistrationServices.NewEventRegistrationService(db, eventRegistrationQueryRepository, eventRegistrationStoreRepository, eventTicketQueryRepository, eventTicketStoreRepository)
 }
 
 func initializeControllers() {
@@ -196,6 +208,7 @@ func initializeControllers() {
 	roleControllers.NewRoleController(router, roleService)
 	eventControllers.NewEventController(router, eventService)
 	userControllers.NewUserController(router, userService)
+	eventregistrationControllers.NewEventRegistrationController(router, eventRegistrationService)
 }
 
 func initializeHttpServer() {

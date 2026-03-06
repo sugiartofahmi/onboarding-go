@@ -73,3 +73,17 @@ func (repo *EventTicketQueryRepository) FindOneByEventIdAndType(ctx context.Cont
 	return &result
 }
 
+func (repo *EventTicketQueryRepository) FindByIdForCreateRegistration(ctx context.Context, id uuid.UUID) *entities.EventTicketEntity {
+	query := repo.eventTicketModel.WithContext(ctx)
+	var result entities.EventTicketEntity
+
+	err := query.Select("id", "event_id", "quota", "registered_count").Where("id = ?", id).First(&result).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	} else if err != nil {
+		log.Println("Error find event ticket for create registration:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return &result
+}

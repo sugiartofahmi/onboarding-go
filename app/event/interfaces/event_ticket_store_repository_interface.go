@@ -15,5 +15,7 @@ type EventTicketStoreRepositoryInterface interface {
 	Delete(ctx context.Context, id uuid.UUID) bool
 	BulkCreate(ctx context.Context, entities *[]entities.EventTicketEntity) *[]entities.EventTicketEntity
 	BulkDelete(ctx context.Context, entities *[]entities.EventTicketEntity)
+	IncrementRegisteredCount(ctx context.Context, ticketId uuid.UUID, count int) error
+	DecrementRegisteredCount(ctx context.Context, ticketId uuid.UUID, count int) error
 	WithTransaction(tx *gorm.DB) EventTicketStoreRepositoryInterface
 }
