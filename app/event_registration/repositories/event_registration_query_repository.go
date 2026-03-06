@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	roleConstants "event-backend/app/role/constants"
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
 	"event-backend/infrastructure/exceptions"
@@ -86,18 +87,19 @@ func (repo *EventRegistrationQueryRepository) querySort(query *gorm.DB, dto *eve
 }
 
 func (repo *EventRegistrationQueryRepository) queryFilter(query *gorm.DB, dto *eventregistrationdtos.EventRegistrationQueryRequestDto) *gorm.DB {
-	if dto.UserId != "" {
-		if userId, err := uuid.Parse(dto.UserId); err == nil {
-			query = query.Where("user_id = ?", userId)
-		}
+	isRoleAdmin := dto.CurrentUserRoleName == roleConstants.ADMIN
+	if !isRoleAdmin {
+		query = query.Where("user_id = ?", dto.CurrentUserId)
 	}
+
 	if dto.EventId != "" {
 		if eventId, err := uuid.Parse(dto.EventId); err == nil {
 			query = query.Where("event_id = ?", eventId)
 		}
 	}
+
 	if dto.Status != "" {
-		query = query.Where("status = ?", dto.GetStatus())
+		query = query.Where("status = ?", dto.Status)
 	}
 	return query
 }
