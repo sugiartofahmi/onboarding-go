@@ -32,8 +32,9 @@ func (user *UserQueryRepository) Pagination(ctx context.Context, dto *userdtos.U
 	var results []*entities.UserEntity
 	var total int64
 
-	query = user.QuerySearch(query, dto)
-	query = user.QuerySort(query, dto)
+	query = user.querySearch(query, dto)
+	query = user.querySort(query, dto)
+	query = user.queryFilter(query, dto)
 
 	err := query.Count(&total).Error
 	if err != nil {
@@ -134,14 +135,37 @@ func (user *UserQueryRepository) IsExistsByEmailExcludeId(ctx context.Context, e
 	return exists
 }
 
-func (user *UserQueryRepository) QuerySearch(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
+func (user *UserQueryRepository) FindOneByRoleId(ctx context.Context, roleId uuid.UUID) *entities.RoleEntity {
+	query := user.db.WithContext(ctx)
+	var result entities.RoleEntity
+
+	err := query.Where("id = ?", roleId).First(&result).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	} else if err != nil {
+		log.Println("Error find role by id:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return &result
+}
+
+func (user *UserQueryRepository) queryFilter(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
+	if dto.RoleId != nil {
+		db = db.Where("role_id = ?", *dto.RoleId)
+	}
+
+	return db
+}
+
+func (user *UserQueryRepository) querySearch(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("name ILIKE ? OR email ILIKE ?", "%"+dto.Search+"%", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (user *UserQueryRepository) QuerySort(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
+func (user *UserQueryRepository) querySort(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
 	allowedSortFields := map[string]bool{
 		"name":       true,
 		"email":      true,
@@ -161,19 +185,4 @@ func (user *UserQueryRepository) QuerySort(db *gorm.DB, dto *userdtos.UserQueryR
 	}
 
 	return db.Order(sortBy + " " + order)
-}
-
-func (user *UserQueryRepository) FindOneByRoleId(ctx context.Context, roleId uuid.UUID) *entities.RoleEntity {
-	query := user.db.WithContext(ctx)
-	var result entities.RoleEntity
-
-	err := query.Where("id = ?", roleId).First(&result).Error
-	if err == gorm.ErrRecordNotFound {
-		return nil
-	} else if err != nil {
-		log.Println("Error find role by id:", err)
-		panic(*exceptions.ServerErrorException(err))
-	}
-
-	return &result
 }
