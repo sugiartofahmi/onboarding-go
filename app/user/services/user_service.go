@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	roleConstants "event-backend/app/role/constants"
 	userConstants "event-backend/app/user/constants"
 	userInterfaces "event-backend/app/user/interfaces"
 	"event-backend/entities"
@@ -34,7 +35,6 @@ func NewUserService(
 		roleQueryRepository: roleQueryRepository,
 	}
 }
-
 
 func (service *UserService) Pagination(ctx context.Context, dto *userdtos.UserQueryRequestDto) *infradtos.PaginationResultDto[entities.UserEntity] {
 	return service.userQueryRepository.Pagination(ctx, dto)
@@ -99,5 +99,24 @@ func (service *UserService) Delete(ctx context.Context, id uuid.UUID) {
 		Valid: true,
 	}
 
+	service.userStoreRepository.Update(ctx, existingUser)
+}
+
+func (service *UserService) UpgradeToOrganizer(ctx context.Context, userId uuid.UUID) {
+	existingUser := service.userQueryRepository.FindOneByIdWithRole(ctx, userId)
+	if existingUser == nil {
+		panic(*exceptions.NotFoundException(userConstants.USER_NOT_FOUND))
+	}
+
+	if existingUser.Role.Name != roleConstants.ATTENDEE {
+		panic(*exceptions.BadRequestException("Only attendee can upgrade to organizer"))
+	}
+
+	organizerRole := service.roleQueryRepository.FindOneByName(ctx, roleConstants.ORGANIZER)
+	if organizerRole == nil {
+		panic(*exceptions.NotFoundException(userConstants.USER_ROLE_NOT_FOUND))
+	}
+
+	existingUser.RoleId = organizerRole.Id
 	service.userStoreRepository.Update(ctx, existingUser)
 }

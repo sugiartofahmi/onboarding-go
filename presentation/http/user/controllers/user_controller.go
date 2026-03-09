@@ -24,12 +24,17 @@ func NewUserController(router *gin.Engine, userService userInterfaces.UserServic
 		userService: userService,
 	}
 
-	userRoute := router.Group("/api/v1/users", middlewares.AuthorizationMiddleware(), guards.RoleGuard([]string{roleConstants.ADMIN}))
-	userRoute.GET("", controller.Pagination())
-	userRoute.GET("/:id", controller.Detail())
-	userRoute.POST("", middlewares.ValidateRequestJson[userDtos.UserCreateRequestDto](), controller.Create())
-	userRoute.PUT("/:id", middlewares.ValidateRequestJson[userDtos.UserUpdateRequestDto](), controller.Update())
-	userRoute.DELETE("/:id", controller.Delete())
+	userRoute := router.Group("/api/v1/users", middlewares.AuthorizationMiddleware())
+
+	userAdminRoute := userRoute.Group("", guards.RoleGuard([]string{roleConstants.ADMIN}))
+	userAdminRoute.GET("", controller.Pagination())
+	userAdminRoute.GET("/:id", controller.Detail())
+	userAdminRoute.POST("", middlewares.ValidateRequestJson[userDtos.UserCreateRequestDto](), controller.Create())
+	userAdminRoute.PUT("/:id", middlewares.ValidateRequestJson[userDtos.UserUpdateRequestDto](), controller.Update())
+	userAdminRoute.DELETE("/:id", controller.Delete())
+
+	userAttendeeRoute := userRoute.Group("", guards.RoleGuard([]string{roleConstants.ATTENDEE}))
+	userAttendeeRoute.POST("/upgrade-to-organizer", controller.UpgradeToOrganizer())
 }
 
 func (controller *UserController) Pagination() gin.HandlerFunc {
@@ -88,5 +93,16 @@ func (controller *UserController) Create() gin.HandlerFunc {
 		response := utils.SuccessResponse(http.StatusCreated, userConstants.USER_CREATE_SUCCESS, userDtos.UserDetailResponseDtoFromEntity(result))
 
 		httpContext.JSON(http.StatusCreated, response)
+	}
+}
+
+func (controller *UserController) UpgradeToOrganizer() gin.HandlerFunc {
+	return func(httpContext *gin.Context) {
+		ctx := httpContext.Request.Context()
+		userId := utils.GetAuthUserId(httpContext)
+		controller.userService.UpgradeToOrganizer(ctx, userId)
+		response := utils.SuccessResponse(http.StatusOK, userConstants.USER_UPGRADE_TO_ORGANIZER_SUCCESS, nil)
+
+		httpContext.JSON(http.StatusOK, response)
 	}
 }

@@ -16,4 +16,5 @@ type UserServiceInterface interface {
 	Detail(ctx context.Context, id uuid.UUID) *entities.UserEntity
 	Update(ctx context.Context, dto *userdtos.UserUpdateRequestDto) *entities.UserEntity
 	Delete(ctx context.Context, id uuid.UUID)
+	UpgradeToOrganizer(ctx context.Context, userId uuid.UUID)
 }
