@@ -212,16 +212,19 @@ func (repo *EventQueryRepository) querySearch(db *gorm.DB, dto *eventdtos.EventQ
 }
 
 func (repo *EventQueryRepository) querySort(db *gorm.DB, dto *eventdtos.EventQueryRequestDto) *gorm.DB {
-	allowedSortFields := map[string]bool{
-		"title":      true,
-		"start_date": true,
-		"created_at": true,
-		"updated_at": true,
+	sortableColumns := []string{
+		"title",
+		"start_date",
+		"created_at",
+		"updated_at",
 	}
 
-	sortBy := dto.SortBy
-	if sortBy == "" || !allowedSortFields[sortBy] {
-		sortBy = "created_at"
+	sortBy := "created_at"
+	if dto.SortBy != "" {
+		isColumnAllowed := utils.Contains(sortableColumns, dto.SortBy)
+		if isColumnAllowed {
+			sortBy = dto.SortBy
+		}
 	}
 
 	order := "DESC"

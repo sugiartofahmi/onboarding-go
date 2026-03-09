@@ -32,8 +32,8 @@ func (category *CategoryQueryRepository) Pagination(ctx context.Context, dto *ca
 	var results []*entities.CategoryEntity
 	var total int64
 
-	query = category.QuerySearch(query, dto)
-	query = category.QuerySort(query, dto)
+	query = category.querySearch(query, dto)
+	query = category.querySort(query, dto)
 
 	err := query.Count(&total).Error
 	if err != nil {
@@ -157,23 +157,26 @@ func (category *CategoryQueryRepository) IsExistsBySlugExcludeId(ctx context.Con
 
 // Private helper methods
 
-func (category *CategoryQueryRepository) QuerySearch(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDto) *gorm.DB {
+func (category *CategoryQueryRepository) querySearch(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("name ILIKE ?", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (category *CategoryQueryRepository) QuerySort(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDto) *gorm.DB {
-	allowedSortFields := map[string]bool{
-		"name":       true,
-		"created_at": true,
-		"updated_at": true,
+func (category *CategoryQueryRepository) querySort(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDto) *gorm.DB {
+	sortableColumns := []string{
+		"name",
+		"created_at",
+		"updated_at",
 	}
 
-	sortBy := dto.SortBy
-	if sortBy == "" || !allowedSortFields[sortBy] {
-		sortBy = "created_at"
+	sortBy := "created_at"
+	if dto.SortBy != "" {
+		isColumnAllowed := utils.Contains(sortableColumns, dto.SortBy)
+		if isColumnAllowed {
+			sortBy = dto.SortBy
+		}
 	}
 
 	order := "DESC"

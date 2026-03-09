@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -18,4 +19,9 @@ func GenerateSlug(text string) string {
 	slug = strings.TrimSpace(slug)
 	slug = strings.ReplaceAll(slug, " ", "-")
 	return slug
+}
+
+
+func Contains(slice []string, str string) bool {
+	return slices.Contains(slice, str)
 }

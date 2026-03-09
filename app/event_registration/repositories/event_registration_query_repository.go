@@ -10,6 +10,7 @@ import (
 	roleConstants "event-backend/app/role/constants"
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
+	"event-backend/infrastructure/enums"
 	"event-backend/infrastructure/exceptions"
 	"event-backend/infrastructure/utils"
 	eventregistrationdtos "event-backend/presentation/http/event_registration/dtos"
@@ -75,15 +76,22 @@ func (repo *EventRegistrationQueryRepository) querySearch(query *gorm.DB, dto *e
 }
 
 func (repo *EventRegistrationQueryRepository) querySort(query *gorm.DB, dto *eventregistrationdtos.EventRegistrationQueryRequestDto) *gorm.DB {
-	orderBy := "created_at"
+	sortableColumns := []string{"status", "created_at", "updated_at"}
+
+	sortBy := "created_at"
 	if dto.SortBy != "" {
-		orderBy = dto.SortBy
+		isColumnAllowed := utils.Contains(sortableColumns, dto.SortBy)
+		if isColumnAllowed {
+			sortBy = dto.SortBy
+		}
 	}
-	sort := "desc"
-	if dto.Order != "" {
-		sort = string(dto.Order)
+
+	order := "DESC"
+	if dto.Order == enums.SortOrderAsc {
+		order = "ASC"
 	}
-	return query.Order(orderBy + " " + sort)
+
+	return query.Order(sortBy + " " + order)
 }
 
 func (repo *EventRegistrationQueryRepository) queryFilter(query *gorm.DB, dto *eventregistrationdtos.EventRegistrationQueryRequestDto) *gorm.DB {
