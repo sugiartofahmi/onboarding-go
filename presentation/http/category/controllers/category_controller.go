@@ -29,8 +29,8 @@ func NewCategoryController(router *gin.Engine, categoryService categoryInterface
 	categoryRoute.GET("/:id", controller.Detail())
 
 	protected := categoryRoute.Group("", guards.RoleGuard([]string{roleConstants.ADMIN}))
-	protected.POST("", controller.Create())
-	protected.PUT("/:id", controller.Update())
+	protected.POST("", middlewares.ValidateRequestJson[categoryDtos.CategoryCreateRequestDto](), controller.Create())
+	protected.PUT("/:id", middlewares.ValidateRequestJson[categoryDtos.CategoryUpdateRequestDto](), controller.Update())
 	protected.DELETE("/:id", controller.Delete())
 }
 
@@ -61,8 +61,7 @@ func (controller *CategoryController) Detail() gin.HandlerFunc {
 func (controller *CategoryController) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := &categoryDtos.CategoryCreateRequestDto{}
-		httpContext.ShouldBindJSON(dto)
+		dto := httpContext.MustGet(middlewares.RequestBodyJsonKey).(*categoryDtos.CategoryCreateRequestDto)
 		result := controller.categoryService.Create(ctx, dto)
 		response := utils.SuccessResponse(http.StatusCreated, categoryConstants.CATEGORY_CREATE_SUCCESS, categoryDtos.CategoryDetailResponseDtoFromEntity(*result))
 
@@ -74,8 +73,7 @@ func (controller *CategoryController) Update() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
-		dto := &categoryDtos.CategoryUpdateRequestDto{}
-		httpContext.ShouldBindJSON(dto)
+		dto := httpContext.MustGet(middlewares.RequestBodyJsonKey).(*categoryDtos.CategoryUpdateRequestDto)
 		dto.Id = id
 		result := controller.categoryService.Update(ctx, dto)
 		response := utils.SuccessResponse(http.StatusOK, categoryConstants.CATEGORY_UPDATE_SUCCESS, categoryDtos.CategoryDetailResponseDtoFromEntity(*result))

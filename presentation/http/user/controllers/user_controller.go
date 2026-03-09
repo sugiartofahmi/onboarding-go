@@ -27,8 +27,8 @@ func NewUserController(router *gin.Engine, userService userInterfaces.UserServic
 	userRoute := router.Group("/api/v1/users", middlewares.AuthorizationMiddleware(), guards.RoleGuard([]string{roleConstants.ADMIN}))
 	userRoute.GET("", controller.Pagination())
 	userRoute.GET("/:id", controller.Detail())
-	userRoute.POST("", controller.Create())
-	userRoute.PUT("/:id", controller.Update())
+	userRoute.POST("", middlewares.ValidateRequestJson[userDtos.UserCreateRequestDto](), controller.Create())
+	userRoute.PUT("/:id", middlewares.ValidateRequestJson[userDtos.UserUpdateRequestDto](), controller.Update())
 	userRoute.DELETE("/:id", controller.Delete())
 }
 
@@ -60,8 +60,7 @@ func (controller *UserController) Update() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
-		dto := &userDtos.UserUpdateRequestDto{}
-		httpContext.ShouldBindJSON(dto)
+		dto := httpContext.MustGet(middlewares.RequestBodyJsonKey).(*userDtos.UserUpdateRequestDto)
 		dto.Id = id
 		result := controller.userService.Update(ctx, dto)
 		response := utils.SuccessResponse(http.StatusOK, userConstants.USER_UPDATE_SUCCESS, userDtos.UserDetailResponseDtoFromEntity(result))
@@ -84,8 +83,7 @@ func (controller *UserController) Delete() gin.HandlerFunc {
 func (controller *UserController) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := &userDtos.UserCreateRequestDto{}
-		httpContext.ShouldBindJSON(dto)
+		dto := httpContext.MustGet(middlewares.RequestBodyJsonKey).(*userDtos.UserCreateRequestDto)
 		result := controller.userService.Create(ctx, dto)
 		response := utils.SuccessResponse(http.StatusCreated, userConstants.USER_CREATE_SUCCESS, userDtos.UserDetailResponseDtoFromEntity(result))
 

@@ -7,6 +7,7 @@ import (
 
 	authConstants "event-backend/app/auth/constants"
 	authInterfaces "event-backend/app/auth/interfaces"
+	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
 	authDtos "event-backend/presentation/http/auth/dtos"
 )
@@ -22,8 +23,8 @@ func NewAuthController(router *gin.Engine, authService authInterfaces.AuthServic
 		authService: authService,
 	}
 
-	authRoute.POST("/login", controller.Login())
-	authRoute.POST("/register", controller.Register())
+	authRoute.POST("/login", middlewares.ValidateRequestJson[authDtos.AuthLoginRequestDto](),  controller.Login())
+	authRoute.POST("/register", middlewares.ValidateRequestJson[authDtos.AuthRegisterRequestDto](), controller.Register())
 }
 
 func (controller *AuthController) Login() gin.HandlerFunc {
