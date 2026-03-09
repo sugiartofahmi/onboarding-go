@@ -30,8 +30,8 @@ func NewEventController(router *gin.Engine, eventService eventInterfaces.EventSe
 	eventRoute.GET("/:id", controller.Detail())
 
 	organizerRoute := eventRoute.Group("", guards.RoleGuard([]string{roleConstants.ORGANIZER}))
-	organizerRoute.POST("", controller.Create())
-	organizerRoute.PUT("/:id", controller.Update())
+	organizerRoute.POST("", middlewares.ValidateRequestJson[eventDtos.EventCreateRequestDto](), controller.Create())
+	organizerRoute.PUT("/:id", middlewares.ValidateRequestJson[eventDtos.EventUpdateRequestDto](), controller.Update())
 	organizerRoute.DELETE("/:id", controller.Delete())
 }
 
@@ -62,8 +62,7 @@ func (controller *EventController) Detail() gin.HandlerFunc {
 func (controller *EventController) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := &eventDtos.EventCreateRequestDto{}
-		httpContext.ShouldBindJSON(dto)
+		dto := httpContext.MustGet(middlewares.RequestBodyJsonKey).(*eventDtos.EventCreateRequestDto)
 
 		currentUserId := utils.GetAuthUserId(httpContext)
 		dto.CreatedBy = &currentUserId
@@ -79,8 +78,7 @@ func (controller *EventController) Update() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
-		dto := &eventDtos.EventUpdateRequestDto{}
-		httpContext.ShouldBindJSON(dto)
+		dto := httpContext.MustGet(middlewares.RequestBodyJsonKey).(*eventDtos.EventUpdateRequestDto)
 
 		currentUserId := utils.GetAuthUserId(httpContext)
 		dto.UpdatedBy = &currentUserId

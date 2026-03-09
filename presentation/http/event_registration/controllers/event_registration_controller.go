@@ -27,8 +27,8 @@ func NewEventRegistrationController(router *gin.Engine, eventRegistrationService
 	registrationRoute := router.Group("/api/v1/registrations", middlewares.AuthorizationMiddleware())
 	registrationRoute.GET("", controller.Pagination())
 	registrationRoute.GET("/:id", controller.Detail())
-	registrationRoute.POST("", controller.Create(), guards.RoleGuard([]string{roleConstants.ATTENDEE, roleConstants.ORGANIZER}))
-	registrationRoute.POST("/:id/cancel", controller.Cancel(), guards.RoleGuard([]string{roleConstants.ATTENDEE, roleConstants.ORGANIZER}))
+	registrationRoute.POST("", guards.RoleGuard([]string{roleConstants.ATTENDEE, roleConstants.ORGANIZER}), middlewares.ValidateRequestJson[eventregistrationDtos.EventRegistrationCreateRequestDto](), controller.Create())
+	registrationRoute.POST("/:id/cancel", guards.RoleGuard([]string{roleConstants.ATTENDEE, roleConstants.ORGANIZER}), middlewares.ValidateRequestJson[eventregistrationDtos.EventRegistrationCancelRequestDto](), controller.Cancel())
 }
 
 func (controller *EventRegistrationController) Pagination() gin.HandlerFunc {
@@ -63,8 +63,7 @@ func (controller *EventRegistrationController) Detail() gin.HandlerFunc {
 func (controller *EventRegistrationController) Create() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := &eventregistrationDtos.EventRegistrationCreateRequestDto{}
-		httpContext.ShouldBindJSON(dto)
+		dto := httpContext.MustGet(middlewares.RequestBodyJsonKey).(*eventregistrationDtos.EventRegistrationCreateRequestDto)
 
 		currentUserId := utils.GetAuthUserId(httpContext)
 		dto.CurrentUserId = &currentUserId
@@ -79,8 +78,7 @@ func (controller *EventRegistrationController) Create() gin.HandlerFunc {
 func (controller *EventRegistrationController) Cancel() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
-		dto := &eventregistrationDtos.EventRegistrationCancelRequestDto{}
-		httpContext.ShouldBindJSON(dto)
+		dto := httpContext.MustGet(middlewares.RequestBodyJsonKey).(*eventregistrationDtos.EventRegistrationCancelRequestDto)
 
 		currentUserId := utils.GetAuthUserId(httpContext)
 		dto.CurrentUserId = &currentUserId
