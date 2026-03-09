@@ -166,17 +166,14 @@ func (user *UserQueryRepository) querySearch(db *gorm.DB, dto *userdtos.UserQuer
 }
 
 func (user *UserQueryRepository) querySort(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
-	allowedSortFields := map[string]bool{
-		"name":       true,
-		"email":      true,
-		"is_active":  true,
-		"created_at": true,
-		"updated_at": true,
-	}
+	sortableColumns := []string{"name", "email", "is_active", "created_at", "updated_at"}
 
-	sortBy := dto.SortBy
-	if sortBy == "" || !allowedSortFields[sortBy] {
-		sortBy = "created_at"
+	sortBy := "created_at"
+	if dto.SortBy != "" {
+		isColumnAllowed := utils.Contains(sortableColumns, dto.SortBy)
+		if isColumnAllowed {
+			sortBy = dto.SortBy
+		}
 	}
 
 	order := "DESC"
