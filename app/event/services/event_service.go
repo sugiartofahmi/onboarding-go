@@ -57,17 +57,28 @@ func (service *EventService) Detail(ctx context.Context, id uuid.UUID) *entities
 }
 
 func (service *EventService) Create(ctx context.Context, dto *eventDtos.EventCreateRequestDto) *entities.EventEntity {
-	categoryExists := service.categoryQueryRepository.FindOneById(ctx, dto.CategoryId)
-	if categoryExists == nil {
+	findCategoryCh := make(chan *entities.CategoryEntity, 1)
+	isTitleExistsCh := make(chan bool, 1)
+
+	go func() {
+		findCategoryCh <- service.categoryQueryRepository.FindOneById(ctx, dto.CategoryId)
+	}()
+
+	go func() {
+		isTitleExistsCh <- service.eventQueryRepository.IsExistsByTitle(ctx, dto.Title)
+	}()
+
+	findCategoryResult := <-findCategoryCh
+	isTitleExistsResult := <-isTitleExistsCh
+
+	if findCategoryResult == nil {
 		panic(*exceptions.NotFoundException(eventConstants.EVENT_CATEGORY_NOT_FOUND))
+	}
+	if isTitleExistsResult {
+		panic(*exceptions.UnprocessableEntityException(eventConstants.EVENT_TITLE_EXISTS))
 	}
 
 	newEvent := dto.ToEntity()
-
-	isExistsByTitle := service.eventQueryRepository.IsExistsByTitle(ctx, newEvent.Title)
-	if isExistsByTitle {
-		panic(*exceptions.UnprocessableEntityException(eventConstants.EVENT_TITLE_EXISTS))
-	}
 
 	var createdEvent *entities.EventEntity
 	service.db.Transaction(func(tx *gorm.DB) error {
@@ -82,34 +93,54 @@ func (service *EventService) Create(ctx context.Context, dto *eventDtos.EventCre
 }
 
 func (service *EventService) Update(ctx context.Context, dto *eventDtos.EventUpdateRequestDto) *entities.EventEntity {
-	existingEvent := service.eventQueryRepository.FindOneById(ctx, dto.Id)
-	if existingEvent == nil {
+	findEventCh := make(chan *entities.EventEntity, 1)
+	findCategoryCh := make(chan *entities.CategoryEntity, 1)
+	isTitleExistsCh := make(chan bool, 1)
+	findTicketsCh := make(chan []entities.EventTicketEntity, 1)
+
+	go func() {
+		findEventCh <- service.eventQueryRepository.FindOneById(ctx, dto.Id)
+	}()
+
+	go func() {
+		findCategoryCh <- service.categoryQueryRepository.FindOneById(ctx, dto.CategoryId)
+	}()
+
+	go func() {
+		isTitleExistsCh <- service.eventQueryRepository.IsExistsByTitleExcludeId(ctx, dto.Title, dto.Id)
+	}()
+
+	go func() {
+		findTicketsCh <- service.eventTicketQueryRepository.FindManyByEventId(ctx, dto.Id)
+	}()
+
+	findEventResult := <-findEventCh
+	findingCategoryResult := <-findCategoryCh
+	isTitleExistsResult := <-isTitleExistsCh
+	findTicketsResult := <-findTicketsCh
+
+	if findEventResult == nil {
 		panic(*exceptions.NotFoundException(eventConstants.EVENT_NOT_FOUND))
 	}
 
-
-	if existingEvent.OrganizerUserId != *dto.UpdatedBy {
+	if findEventResult.OrganizerUserId != *dto.UpdatedBy {
 		panic(*exceptions.ForbiddenException(eventConstants.EVENT_NOT_OWNER))
 	}
 
-	categoryExists := service.categoryQueryRepository.FindOneById(ctx, dto.CategoryId)
-	if categoryExists == nil {
+	if findingCategoryResult == nil {
 		panic(*exceptions.BadRequestException(eventConstants.EVENT_CATEGORY_NOT_FOUND))
 	}
 
-	updateEvent := dto.ToEntity(existingEvent)
-
-	isExistsByTitle := service.eventQueryRepository.IsExistsByTitleExcludeId(ctx, updateEvent.Title, updateEvent.Id)
-	if isExistsByTitle {
+	if isTitleExistsResult {
 		panic(*exceptions.BadRequestException(eventConstants.EVENT_TITLE_EXISTS))
 	}
 
-	existingEventTicket := service.eventTicketQueryRepository.FindManyByEventId(ctx, dto.Id)
+	updateEvent := dto.ToEntity(findEventResult)
 
 	var updatedEvent *entities.EventEntity
 	service.db.Transaction(func(tx *gorm.DB) error {
-		if len(existingEventTicket) > 0 {
-			service.eventTicketStoreRepository.BulkDelete(ctx, &existingEventTicket)
+		if len(findTicketsResult) > 0 {
+			service.eventTicketStoreRepository.BulkDelete(ctx, &findTicketsResult)
 		}
 
 		updatedEvent = service.eventStoreRepository.WithTransaction(tx).Update(ctx, updateEvent)
