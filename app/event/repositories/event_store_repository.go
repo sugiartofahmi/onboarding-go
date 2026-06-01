@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"event-backend/app/event/interfaces"
@@ -52,4 +53,17 @@ func (repo *EventStoreRepository) Update(ctx context.Context, entity *entities.E
 	}
 
 	return entity
+}
+
+func (repo *EventStoreRepository) DeleteById(ctx context.Context, id uuid.UUID) error {
+	query := repo.eventModel.WithContext(ctx)
+	entity := &entities.EventEntity{Id: id}
+
+	err := query.Delete(entity).Error
+	if err != nil {
+		log.Println("Error delete event:", err)
+		return err
+	}
+
+	return nil
 }

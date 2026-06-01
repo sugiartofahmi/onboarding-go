@@ -13,7 +13,7 @@ import (
 	"event-backend/infrastructure/enums"
 	"event-backend/infrastructure/exceptions"
 	"event-backend/infrastructure/utils"
-	eventregistrationdtos "event-backend/presentation/http/event_registration/dtos"
+	eventregistrationDtos "event-backend/app/event_registration/dtos"
 )
 
 type EventRegistrationQueryRepository struct {
@@ -28,7 +28,7 @@ func NewEventRegistrationQueryRepository(db *gorm.DB) *EventRegistrationQueryRep
 	}
 }
 
-func (repo *EventRegistrationQueryRepository) Pagination(ctx context.Context, dto *eventregistrationdtos.EventRegistrationQueryRequestDto) *infradtos.PaginationResultDto[entities.EventRegistrationEntity] {
+func (repo *EventRegistrationQueryRepository) Pagination(ctx context.Context, dto *eventregistrationDtos.EventRegistrationQueryRequestDto) *infradtos.PaginationResultDto[entities.EventRegistrationEntity] {
 	query := repo.eventRegModel.WithContext(ctx)
 	var results []*entities.EventRegistrationEntity
 	var total int64
@@ -70,12 +70,12 @@ func (repo *EventRegistrationQueryRepository) FindOneById(ctx context.Context, i
 	return &result
 }
 
-func (repo *EventRegistrationQueryRepository) querySearch(query *gorm.DB, dto *eventregistrationdtos.EventRegistrationQueryRequestDto) *gorm.DB {
+func (repo *EventRegistrationQueryRepository) querySearch(query *gorm.DB, dto *eventregistrationDtos.EventRegistrationQueryRequestDto) *gorm.DB {
 
 	return query
 }
 
-func (repo *EventRegistrationQueryRepository) querySort(query *gorm.DB, dto *eventregistrationdtos.EventRegistrationQueryRequestDto) *gorm.DB {
+func (repo *EventRegistrationQueryRepository) querySort(query *gorm.DB, dto *eventregistrationDtos.EventRegistrationQueryRequestDto) *gorm.DB {
 	sortableColumns := []string{"status", "created_at", "updated_at"}
 
 	sortBy := "created_at"
@@ -94,7 +94,7 @@ func (repo *EventRegistrationQueryRepository) querySort(query *gorm.DB, dto *eve
 	return query.Order(sortBy + " " + order)
 }
 
-func (repo *EventRegistrationQueryRepository) queryFilter(query *gorm.DB, dto *eventregistrationdtos.EventRegistrationQueryRequestDto) *gorm.DB {
+func (repo *EventRegistrationQueryRepository) queryFilter(query *gorm.DB, dto *eventregistrationDtos.EventRegistrationQueryRequestDto) *gorm.DB {
 	isRoleAdmin := dto.CurrentUserRoleName == roleConstants.ADMIN
 	if !isRoleAdmin {
 		query = query.Where("user_id = ?", dto.CurrentUserId)

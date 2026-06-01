@@ -12,7 +12,7 @@ import (
 	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
 	uuidValidator "event-backend/infrastructure/validators"
-	roleDtos "event-backend/presentation/http/role/dtos"
+	roleDtos "event-backend/app/role/dtos"
 )
 
 type RoleController struct {
@@ -84,7 +84,7 @@ func (controller *RoleController) Delete() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
-		controller.roleService.SoftDelete(ctx, id)
+		controller.roleService.Delete(ctx, id)
 		response := utils.SuccessResponse(http.StatusOK, roleConstants2.ROLE_DELETE_SUCCESS, nil)
 
 		httpContext.JSON(http.StatusOK, response)

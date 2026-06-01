@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,3 +23,12 @@ type RoleEntity struct {
 }
 
 func (RoleEntity) TableName() string { return "roles" }
+
+func (r *RoleEntity) BeforeDelete(tx *gorm.DB) error {
+	var count int64
+	tx.Model(&UserEntity{}).Where("role_id = ?", r.Id).Count(&count)
+	if count > 0 {
+		return errors.New("cannot delete role: still has active users")
+	}
+	return nil
+}

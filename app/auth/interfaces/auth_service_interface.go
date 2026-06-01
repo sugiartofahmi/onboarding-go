@@ -3,10 +3,10 @@ package interfaces
 import (
 	"context"
 
-	authdtos "event-backend/presentation/http/auth/dtos"
+	authDtos "event-backend/app/auth/dtos"
 )
 
 type AuthServiceInterface interface {
-	Login(ctx context.Context, dto *authdtos.AuthLoginRequestDto) *authdtos.AuthLoginResponseDto
-	Register(ctx context.Context, dto *authdtos.AuthRegisterRequestDto) *authdtos.AuthRegisterResponseDto
+	Login(ctx context.Context, dto *authDtos.AuthLoginRequestDto) *authDtos.AuthLoginResponseDto
+	Register(ctx context.Context, dto *authDtos.AuthRegisterRequestDto) *authDtos.AuthRegisterResponseDto
 }

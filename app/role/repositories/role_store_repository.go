@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"event-backend/entities"
@@ -42,4 +43,17 @@ func (repo *RoleStoreRepository) Update(ctx context.Context, entity *entities.Ro
 	}
 
 	return entity
+}
+
+func (repo *RoleStoreRepository) DeleteById(ctx context.Context, id uuid.UUID) error {
+	query := repo.roleModel.WithContext(ctx)
+	entity := &entities.RoleEntity{Id: id}
+
+	err := query.Delete(entity).Error
+	if err != nil {
+		log.Println("Error delete role:", err)
+		return err
+	}
+
+	return nil
 }

@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,3 +34,12 @@ type EventEntity struct {
 }
 
 func (EventEntity) TableName() string { return "events" }
+
+func (e *EventEntity) BeforeDelete(tx *gorm.DB) error {
+	var count int64
+	tx.Model(&EventRegistrationEntity{}).Where("event_id = ?", e.Id).Count(&count)
+	if count > 0 {
+		return errors.New("cannot delete event: still has active registrations")
+	}
+	return nil
+}

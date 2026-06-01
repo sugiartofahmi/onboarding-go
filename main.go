@@ -24,6 +24,10 @@ import (
 	"event-backend/migration"
 	"event-backend/seeder"
 
+	healthInterfaces "event-backend/app/health/interfaces"
+	healthServices "event-backend/app/health/services"
+	healthControllers "event-backend/presentation/http/health/controllers"
+
 	categoryInterfaces "event-backend/app/category/interfaces"
 	categoryRepositories "event-backend/app/category/repositories"
 	categoryServices "event-backend/app/category/services"
@@ -87,6 +91,7 @@ var (
 	eventRegistrationQueryRepository eventregistrationRepoInterfaces.EventRegistrationQueryRepositoryInterface
 	eventRegistrationStoreRepository eventregistrationRepoInterfaces.EventRegistrationStoreRepositoryInterface
 	eventRegistrationService         eventregistrationInterfaces.EventRegistrationServiceInterface
+	healthService                    healthInterfaces.HealthServiceInterface
 )
 
 func main() {
@@ -171,6 +176,7 @@ func initializeRouter() {
 		MaxAge:           12 * time.Hour,
 	}
 
+	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
 	router.Use(cors.New(corsConfig))
 	router.Use(middlewares.ExceptionMiddleware())
@@ -200,6 +206,7 @@ func initializeServices() {
 	eventService = eventServices.NewEventService(db, eventQueryRepository, eventStoreRepository, eventTicketQueryRepository, eventTicketStoreRepository, categoryQueryRepository)
 	userService = userServices.NewUserService(userQueryRepository, userStoreRepository, roleQueryRepository)
 	eventRegistrationService = eventregistrationServices.NewEventRegistrationService(db, eventRegistrationQueryRepository, eventRegistrationStoreRepository, eventTicketQueryRepository, eventTicketStoreRepository)
+	healthService = healthServices.NewHealthService(db, redisCache)
 }
 
 func initializeControllers() {
@@ -209,6 +216,7 @@ func initializeControllers() {
 	eventControllers.NewEventController(router, eventService)
 	userControllers.NewUserController(router, userService)
 	eventregistrationControllers.NewEventRegistrationController(router, eventRegistrationService)
+	healthControllers.NewHealthController(router, healthService)
 }
 
 func initializeHttpServer() {

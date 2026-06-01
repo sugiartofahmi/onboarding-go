@@ -8,7 +8,7 @@ import (
 	roleInterfaces "event-backend/app/role/interfaces"
 	"event-backend/infrastructure/exceptions"
 	"event-backend/infrastructure/utils"
-	authdtos "event-backend/presentation/http/auth/dtos"
+	authDtos "event-backend/app/auth/dtos"
 )
 
 type AuthService struct {
@@ -29,7 +29,7 @@ func NewAuthService(
 	}
 }
 
-func (service *AuthService) Login(ctx context.Context, request *authdtos.AuthLoginRequestDto) *authdtos.AuthLoginResponseDto {
+func (service *AuthService) Login(ctx context.Context, request *authDtos.AuthLoginRequestDto) *authDtos.AuthLoginResponseDto {
 	user := service.authQueryRepository.FindOneByEmailWithRole(ctx, request.Email)
 	if user == nil {
 		panic(*exceptions.UnauthenticatedException(authConstants.AUTH_CREDENTIAL_NOT_VALID))
@@ -42,14 +42,14 @@ func (service *AuthService) Login(ctx context.Context, request *authdtos.AuthLog
 
 	token, expiresAt := utils.GenerateToken(user)
 
-	return &authdtos.AuthLoginResponseDto{
+	return &authDtos.AuthLoginResponseDto{
 		Token:     token,
 		TokenType: "Bearer",
 		ExpiresAt: expiresAt,
 	}
 }
 
-func (service *AuthService) Register(ctx context.Context, request *authdtos.AuthRegisterRequestDto) *authdtos.AuthRegisterResponseDto {
+func (service *AuthService) Register(ctx context.Context, request *authDtos.AuthRegisterRequestDto) *authDtos.AuthRegisterResponseDto {
 	isEmailExists := service.authQueryRepository.IsExistsByEmail(ctx, request.Email)
 	if isEmailExists {
 		panic(*exceptions.UnprocessableEntityException(authConstants.AUTH_EMAIL_ALREADY_EXISTS))
@@ -64,7 +64,7 @@ func (service *AuthService) Register(ctx context.Context, request *authdtos.Auth
 	user.RoleId = role.Id
 	result := service.authStoreRepository.Create(ctx, user)
 
-	return &authdtos.AuthRegisterResponseDto{
+	return &authDtos.AuthRegisterResponseDto{
 		Id:        result.Id,
 		Name:      result.Name,
 		Email:     result.Email,

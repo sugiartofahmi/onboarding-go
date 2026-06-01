@@ -13,7 +13,7 @@ import (
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
 	"event-backend/infrastructure/exceptions"
-	eventregistrationdtos "event-backend/presentation/http/event_registration/dtos"
+	eventregistrationDtos "event-backend/app/event_registration/dtos"
 )
 
 type EventRegistrationService struct {
@@ -40,7 +40,7 @@ func NewEventRegistrationService(
 	}
 }
 
-func (service *EventRegistrationService) Pagination(ctx context.Context, dto *eventregistrationdtos.EventRegistrationQueryRequestDto) *infradtos.PaginationResultDto[entities.EventRegistrationEntity] {
+func (service *EventRegistrationService) Pagination(ctx context.Context, dto *eventregistrationDtos.EventRegistrationQueryRequestDto) *infradtos.PaginationResultDto[entities.EventRegistrationEntity] {
 	return service.eventRegistrationQueryRepository.Pagination(ctx, dto)
 }
 
@@ -53,7 +53,7 @@ func (service *EventRegistrationService) Detail(ctx context.Context, id uuid.UUI
 	return registration
 }
 
-func (service *EventRegistrationService) Create(ctx context.Context, dto *eventregistrationdtos.EventRegistrationCreateRequestDto) *entities.EventRegistrationEntity {
+func (service *EventRegistrationService) Create(ctx context.Context, dto *eventregistrationDtos.EventRegistrationCreateRequestDto) *entities.EventRegistrationEntity {
 	ticket := service.eventTicketQueryRepository.FindByIdForCreateRegistration(ctx, dto.EventTicketId)
 	if ticket == nil {
 		panic(*exceptions.NotFoundException(eventregistrationConstants.TICKET_NOT_FOUND))
@@ -80,7 +80,7 @@ func (service *EventRegistrationService) Create(ctx context.Context, dto *eventr
 	return created
 }
 
-func (service *EventRegistrationService) Cancel(ctx context.Context, dto *eventregistrationdtos.EventRegistrationCancelRequestDto) *entities.EventRegistrationEntity {
+func (service *EventRegistrationService) Cancel(ctx context.Context, dto *eventregistrationDtos.EventRegistrationCancelRequestDto) *entities.EventRegistrationEntity {
 	registration := service.eventRegistrationQueryRepository.FindOneById(ctx, dto.Id)
 	if registration == nil {
 		panic(*exceptions.NotFoundException(eventregistrationConstants.REGISTRATION_NOT_FOUND))

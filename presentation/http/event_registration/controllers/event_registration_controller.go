@@ -12,7 +12,7 @@ import (
 	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
 	uuidValidator "event-backend/infrastructure/validators"
-	eventregistrationDtos "event-backend/presentation/http/event_registration/dtos"
+	eventregistrationDtos "event-backend/app/event_registration/dtos"
 )
 
 type EventRegistrationController struct {

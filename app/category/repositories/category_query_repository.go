@@ -12,7 +12,7 @@ import (
 	"event-backend/infrastructure/enums"
 	"event-backend/infrastructure/exceptions"
 	"event-backend/infrastructure/utils"
-	categorydtos "event-backend/presentation/http/category/dtos"
+	categoryDtos "event-backend/app/category/dtos"
 )
 
 type CategoryQueryRepository struct {
@@ -27,7 +27,7 @@ func NewCategoryQueryRepository(db *gorm.DB) *CategoryQueryRepository {
 	}
 }
 
-func (category *CategoryQueryRepository) Pagination(ctx context.Context, dto *categorydtos.CategoryQueryRequestDto) *infradtos.PaginationResultDto[entities.CategoryEntity] {
+func (category *CategoryQueryRepository) Pagination(ctx context.Context, dto *categoryDtos.CategoryQueryRequestDto) *infradtos.PaginationResultDto[entities.CategoryEntity] {
 	query := category.categoryModel.WithContext(ctx)
 	var results []*entities.CategoryEntity
 	var total int64
@@ -81,6 +81,23 @@ func (category *CategoryQueryRepository) FindOneBySlug(ctx context.Context, slug
 	}
 
 	return &result
+}
+
+func (category *CategoryQueryRepository) IsExistsById(ctx context.Context, id uuid.UUID) bool {
+	query := category.categoryModel.WithContext(ctx)
+	var exists bool
+
+	err := query.
+		Select("1").
+		Where("id = ?", id).
+		Scan(&exists).Error
+
+	if err != nil {
+		log.Println("Error check category exists by id:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return exists
 }
 
 func (category *CategoryQueryRepository) IsExistsByName(ctx context.Context, name string) bool {
@@ -157,14 +174,14 @@ func (category *CategoryQueryRepository) IsExistsBySlugExcludeId(ctx context.Con
 
 // Private helper methods
 
-func (category *CategoryQueryRepository) querySearch(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDto) *gorm.DB {
+func (category *CategoryQueryRepository) querySearch(db *gorm.DB, dto *categoryDtos.CategoryQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("name ILIKE ?", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (category *CategoryQueryRepository) querySort(db *gorm.DB, dto *categorydtos.CategoryQueryRequestDto) *gorm.DB {
+func (category *CategoryQueryRepository) querySort(db *gorm.DB, dto *categoryDtos.CategoryQueryRequestDto) *gorm.DB {
 	sortableColumns := []string{
 		"name",
 		"created_at",

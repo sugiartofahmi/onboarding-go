@@ -13,7 +13,7 @@ import (
 	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
 	uuidValidator "event-backend/infrastructure/validators"
-	eventDtos "event-backend/presentation/http/event/dtos"
+	eventDtos "event-backend/app/event/dtos"
 )
 
 type EventController struct {
@@ -97,7 +97,7 @@ func (controller *EventController) Delete() gin.HandlerFunc {
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
 
 		userClaims := httpContext.MustGet(constants.AuthUserKey).(utils.JWTUser)
-		controller.eventService.SoftDelete(ctx, id, userClaims.Id)
+		controller.eventService.Delete(ctx, id, userClaims.Id)
 		response := utils.SuccessResponse(http.StatusOK, eventConstants.EVENT_DELETE_SUCCESS, nil)
 
 		httpContext.JSON(http.StatusOK, response)
