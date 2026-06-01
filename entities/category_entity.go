@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,3 +24,12 @@ type CategoryEntity struct {
 }
 
 func (CategoryEntity) TableName() string { return "categories" }
+
+func (c *CategoryEntity) BeforeDelete(tx *gorm.DB) error {
+	var count int64
+	tx.Model(&EventEntity{}).Where("category_id = ?", c.Id).Count(&count)
+	if count > 0 {
+		return errors.New("cannot delete category: still has active events")
+	}
+	return nil
+}
