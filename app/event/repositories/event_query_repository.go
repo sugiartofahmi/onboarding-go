@@ -114,6 +114,23 @@ func (repo *EventQueryRepository) FindOneByIdWithTickets(ctx context.Context, id
 	return &result
 }
 
+func (repo *EventQueryRepository) IsExistsById(ctx context.Context, id uuid.UUID) bool {
+	query := repo.eventModel.WithContext(ctx)
+	var exists bool
+
+	err := query.
+		Select("1").
+		Where("id = ?", id).
+		Scan(&exists).Error
+
+	if err != nil {
+		log.Println("Error check event exists by id:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return exists
+}
+
 func (repo *EventQueryRepository) IsExistsByTitle(ctx context.Context, title string) bool {
 	query := repo.eventModel.WithContext(ctx)
 	var exists bool

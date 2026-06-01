@@ -16,4 +16,5 @@ type EventServiceInterface interface {
 	Create(ctx context.Context, dto *eventDtos.EventCreateRequestDto) *entities.EventEntity
 	Update(ctx context.Context, dto *eventDtos.EventUpdateRequestDto) *entities.EventEntity
 	SoftDelete(ctx context.Context, id uuid.UUID, currentUserId uuid.UUID)
+	Delete(ctx context.Context, id uuid.UUID, currentUserId uuid.UUID)
 }

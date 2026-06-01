@@ -172,3 +172,19 @@ func (service *EventService) SoftDelete(ctx context.Context, id uuid.UUID, curre
 
 	service.eventStoreRepository.Update(ctx, event)
 }
+
+func (service *EventService) Delete(ctx context.Context, id uuid.UUID, currentUserId uuid.UUID) {
+	event := service.eventQueryRepository.FindOneById(ctx, id)
+	if event == nil {
+		panic(*exceptions.NotFoundException(eventConstants.EVENT_NOT_FOUND))
+	}
+
+	if event.OrganizerUserId != currentUserId {
+		panic(*exceptions.ForbiddenException(eventConstants.EVENT_NOT_OWNER))
+	}
+
+	err := service.eventStoreRepository.DeleteById(ctx, id)
+	if err != nil {
+		panic(*exceptions.UnprocessableEntityException(err.Error()))
+	}
+}
