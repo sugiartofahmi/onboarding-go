@@ -16,4 +16,5 @@ type CategoryServiceInterface interface {
 	Create(ctx context.Context, entity *categoryDtos.CategoryCreateRequestDto) *entities.CategoryEntity
 	Update(ctx context.Context, entity *categoryDtos.CategoryUpdateRequestDto) *entities.CategoryEntity
 	SoftDelete(ctx context.Context, id uuid.UUID)
+	Delete(ctx context.Context, id uuid.UUID)
 }

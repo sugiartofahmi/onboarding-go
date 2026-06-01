@@ -83,6 +83,23 @@ func (category *CategoryQueryRepository) FindOneBySlug(ctx context.Context, slug
 	return &result
 }
 
+func (category *CategoryQueryRepository) IsExistsById(ctx context.Context, id uuid.UUID) bool {
+	query := category.categoryModel.WithContext(ctx)
+	var exists bool
+
+	err := query.
+		Select("1").
+		Where("id = ?", id).
+		Scan(&exists).Error
+
+	if err != nil {
+		log.Println("Error check category exists by id:", err)
+		panic(*exceptions.ServerErrorException(err))
+	}
+
+	return exists
+}
+
 func (category *CategoryQueryRepository) IsExistsByName(ctx context.Context, name string) bool {
 	query := category.categoryModel.WithContext(ctx)
 	var exists bool

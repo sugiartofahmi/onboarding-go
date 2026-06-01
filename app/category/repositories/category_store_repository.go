@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"event-backend/entities"
@@ -42,4 +43,17 @@ func (category *CategoryStoreRepository) Update(ctx context.Context, entity *ent
 	}
 
 	return entity
+}
+
+func (category *CategoryStoreRepository) DeleteById(ctx context.Context, id uuid.UUID) error {
+	query := category.categoryModel.WithContext(ctx)
+	entity := &entities.CategoryEntity{Id: id}
+
+	err := query.Delete(entity).Error
+	if err != nil {
+		log.Println("Error delete category:", err)
+		return err
+	}
+
+	return nil
 }

@@ -94,3 +94,14 @@ func (service *CategoryService) SoftDelete(ctx context.Context, id uuid.UUID) {
 
 	service.categoryStoreRepository.Update(ctx, category)
 }
+
+func (service *CategoryService) Delete(ctx context.Context, id uuid.UUID) {
+	if !service.categoryQueryRepository.IsExistsById(ctx, id) {
+		panic(*exceptions.NotFoundException(categoryConstants.CATEGORY_NOT_FOUND))
+	}
+
+	err := service.categoryStoreRepository.DeleteById(ctx, id)
+	if err != nil {
+		panic(*exceptions.UnprocessableEntityException(err.Error()))
+	}
+}
