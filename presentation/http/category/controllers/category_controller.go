@@ -86,7 +86,7 @@ func (controller *CategoryController) Delete() gin.HandlerFunc {
 	return func(httpContext *gin.Context) {
 		ctx := httpContext.Request.Context()
 		id := uuidValidator.ValidateUUID(httpContext.Param("id"))
-		controller.categoryService.SoftDelete(ctx, id)
+		controller.categoryService.Delete(ctx, id)
 		response := utils.SuccessResponse(http.StatusOK, categoryConstants.CATEGORY_DELETE_SUCCESS, nil)
 
 		httpContext.JSON(http.StatusOK, response)
