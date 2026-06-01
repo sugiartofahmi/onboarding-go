@@ -16,4 +16,5 @@ type RoleServiceInterface interface {
 	Create(ctx context.Context, dto *roleDtos.RoleCreateRequestDto) *entities.RoleEntity
 	Update(ctx context.Context, dto *roleDtos.RoleUpdateRequestDto) *entities.RoleEntity
 	SoftDelete(ctx context.Context, id uuid.UUID)
+	Delete(ctx context.Context, id uuid.UUID)
 }

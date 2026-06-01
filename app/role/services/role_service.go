@@ -84,3 +84,14 @@ func (service *RoleService) SoftDelete(ctx context.Context, id uuid.UUID) {
 
 	service.roleStoreRepository.Update(ctx, role)
 }
+
+func (service *RoleService) Delete(ctx context.Context, id uuid.UUID) {
+	if !service.roleQueryRepository.IsExistsById(ctx, id) {
+		panic(*exceptions.NotFoundException(roleConstants.ROLE_NOT_FOUND))
+	}
+
+	err := service.roleStoreRepository.DeleteById(ctx, id)
+	if err != nil {
+		panic(*exceptions.UnprocessableEntityException(err.Error()))
+	}
+}
