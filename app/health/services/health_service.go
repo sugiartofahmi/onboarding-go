@@ -9,7 +9,7 @@ import (
 	"event-backend/app/health/interfaces"
 	"event-backend/infrastructure/config"
 	redisInterfaces "event-backend/infrastructure/redis/interfaces"
-	healthDtos "event-backend/presentation/http/health/dtos"
+	healthDtos "event-backend/app/health/dtos"
 )
 
 type HealthService struct {

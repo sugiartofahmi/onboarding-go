@@ -12,7 +12,7 @@ import (
 	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
 	uuidValidator "event-backend/infrastructure/validators"
-	categoryDtos "event-backend/presentation/http/category/dtos"
+	categoryDtos "event-backend/app/category/dtos"
 )
 
 type CategoryController struct {

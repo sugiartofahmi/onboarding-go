@@ -7,11 +7,11 @@ import (
 
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
-	categorydtos "event-backend/presentation/http/category/dtos"
+	categoryDtos "event-backend/app/category/dtos"
 )
 
 type CategoryQueryRepositoryInterface interface {
-	Pagination(ctx context.Context, dto *categorydtos.CategoryQueryRequestDto) *infradtos.PaginationResultDto[entities.CategoryEntity]
+	Pagination(ctx context.Context, dto *categoryDtos.CategoryQueryRequestDto) *infradtos.PaginationResultDto[entities.CategoryEntity]
 	FindOneById(ctx context.Context, id uuid.UUID) *entities.CategoryEntity
 	FindOneBySlug(ctx context.Context, slug string) *entities.CategoryEntity
 	IsExistsByName(ctx context.Context, name string) bool

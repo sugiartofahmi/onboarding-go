@@ -12,7 +12,7 @@ import (
 	"event-backend/infrastructure/enums"
 	"event-backend/infrastructure/exceptions"
 	"event-backend/infrastructure/utils"
-	userdtos "event-backend/presentation/http/user/dtos"
+	userDtos "event-backend/app/user/dtos"
 )
 
 type UserQueryRepository struct {
@@ -27,7 +27,7 @@ func NewUserQueryRepository(db *gorm.DB) *UserQueryRepository {
 	}
 }
 
-func (user *UserQueryRepository) Pagination(ctx context.Context, dto *userdtos.UserQueryRequestDto) *infradtos.PaginationResultDto[entities.UserEntity] {
+func (user *UserQueryRepository) Pagination(ctx context.Context, dto *userDtos.UserQueryRequestDto) *infradtos.PaginationResultDto[entities.UserEntity] {
 	query := user.userModel.WithContext(ctx)
 	var results []*entities.UserEntity
 	var total int64
@@ -150,7 +150,7 @@ func (user *UserQueryRepository) FindOneByRoleId(ctx context.Context, roleId uui
 	return &result
 }
 
-func (user *UserQueryRepository) queryFilter(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
+func (user *UserQueryRepository) queryFilter(db *gorm.DB, dto *userDtos.UserQueryRequestDto) *gorm.DB {
 	if dto.RoleId != nil {
 		db = db.Where("role_id = ?", *dto.RoleId)
 	}
@@ -158,14 +158,14 @@ func (user *UserQueryRepository) queryFilter(db *gorm.DB, dto *userdtos.UserQuer
 	return db
 }
 
-func (user *UserQueryRepository) querySearch(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
+func (user *UserQueryRepository) querySearch(db *gorm.DB, dto *userDtos.UserQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("name ILIKE ? OR email ILIKE ?", "%"+dto.Search+"%", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (user *UserQueryRepository) querySort(db *gorm.DB, dto *userdtos.UserQueryRequestDto) *gorm.DB {
+func (user *UserQueryRepository) querySort(db *gorm.DB, dto *userDtos.UserQueryRequestDto) *gorm.DB {
 	sortableColumns := []string{"name", "email", "is_active", "created_at", "updated_at"}
 
 	sortBy := "created_at"

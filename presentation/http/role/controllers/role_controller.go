@@ -12,7 +12,7 @@ import (
 	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
 	uuidValidator "event-backend/infrastructure/validators"
-	roleDtos "event-backend/presentation/http/role/dtos"
+	roleDtos "event-backend/app/role/dtos"
 )
 
 type RoleController struct {

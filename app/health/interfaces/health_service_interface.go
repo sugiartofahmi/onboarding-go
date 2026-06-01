@@ -1,7 +1,7 @@
 package interfaces
 
-import "event-backend/presentation/http/health/dtos"
+import healthDtos "event-backend/app/health/dtos"
 
 type HealthServiceInterface interface {
-	Check() dtos.HealthResponseDto
+	Check() healthDtos.HealthResponseDto
 }

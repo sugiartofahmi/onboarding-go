@@ -9,7 +9,7 @@ import (
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
 	"event-backend/infrastructure/exceptions"
-	categoryDtos "event-backend/presentation/http/category/dtos"
+	categoryDtos "event-backend/app/category/dtos"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

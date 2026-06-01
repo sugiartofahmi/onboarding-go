@@ -13,7 +13,7 @@ import (
 	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
 	uuidValidator "event-backend/infrastructure/validators"
-	eventDtos "event-backend/presentation/http/event/dtos"
+	eventDtos "event-backend/app/event/dtos"
 )
 
 type EventController struct {

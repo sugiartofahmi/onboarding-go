@@ -9,7 +9,7 @@ import (
 	authInterfaces "event-backend/app/auth/interfaces"
 	"event-backend/infrastructure/middlewares"
 	"event-backend/infrastructure/utils"
-	authDtos "event-backend/presentation/http/auth/dtos"
+	authDtos "event-backend/app/auth/dtos"
 )
 
 type AuthController struct {

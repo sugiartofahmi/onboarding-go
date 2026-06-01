@@ -10,7 +10,7 @@ import (
 	"event-backend/entities"
 	infradtos "event-backend/infrastructure/dtos"
 	"event-backend/infrastructure/exceptions"
-	userdtos "event-backend/presentation/http/user/dtos"
+	userDtos "event-backend/app/user/dtos"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -36,7 +36,7 @@ func NewUserService(
 	}
 }
 
-func (service *UserService) Pagination(ctx context.Context, dto *userdtos.UserQueryRequestDto) *infradtos.PaginationResultDto[entities.UserEntity] {
+func (service *UserService) Pagination(ctx context.Context, dto *userDtos.UserQueryRequestDto) *infradtos.PaginationResultDto[entities.UserEntity] {
 	return service.userQueryRepository.Pagination(ctx, dto)
 }
 
@@ -49,7 +49,7 @@ func (service *UserService) Detail(ctx context.Context, id uuid.UUID) *entities.
 	return data
 }
 
-func (service *UserService) Create(ctx context.Context, dto *userdtos.UserCreateRequestDto) *entities.UserEntity {
+func (service *UserService) Create(ctx context.Context, dto *userDtos.UserCreateRequestDto) *entities.UserEntity {
 	isEmailExists := service.userQueryRepository.IsExistsByEmail(ctx, dto.Email)
 	if isEmailExists {
 		panic(*exceptions.BadRequestException(userConstants.USER_EMAIL_EXISTS))
@@ -64,7 +64,7 @@ func (service *UserService) Create(ctx context.Context, dto *userdtos.UserCreate
 	return service.userStoreRepository.Create(ctx, newUser)
 }
 
-func (service *UserService) Update(ctx context.Context, dto *userdtos.UserUpdateRequestDto) *entities.UserEntity {
+func (service *UserService) Update(ctx context.Context, dto *userDtos.UserUpdateRequestDto) *entities.UserEntity {
 	existingUser := service.userQueryRepository.FindOneById(ctx, dto.Id)
 	if existingUser == nil {
 		panic(*exceptions.NotFoundException(userConstants.USER_NOT_FOUND))

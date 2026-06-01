@@ -12,7 +12,7 @@ import (
 	"event-backend/infrastructure/enums"
 	"event-backend/infrastructure/exceptions"
 	"event-backend/infrastructure/utils"
-	eventdtos "event-backend/presentation/http/event/dtos"
+	eventDtos "event-backend/app/event/dtos"
 )
 
 type EventQueryRepository struct {
@@ -27,7 +27,7 @@ func NewEventQueryRepository(db *gorm.DB) *EventQueryRepository {
 	}
 }
 
-func (repo *EventQueryRepository) Pagination(ctx context.Context, dto *eventdtos.EventQueryRequestDto) *infradtos.PaginationResultDto[entities.EventEntity] {
+func (repo *EventQueryRepository) Pagination(ctx context.Context, dto *eventDtos.EventQueryRequestDto) *infradtos.PaginationResultDto[entities.EventEntity] {
 	query := repo.eventModel.WithContext(ctx)
 	var results []*entities.EventEntity
 	var total int64
@@ -204,14 +204,14 @@ func (repo *EventQueryRepository) IsExistsByCategoryId(ctx context.Context, cate
 	return exists
 }
 
-func (repo *EventQueryRepository) querySearch(db *gorm.DB, dto *eventdtos.EventQueryRequestDto) *gorm.DB {
+func (repo *EventQueryRepository) querySearch(db *gorm.DB, dto *eventDtos.EventQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("title ILIKE ?", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (repo *EventQueryRepository) querySort(db *gorm.DB, dto *eventdtos.EventQueryRequestDto) *gorm.DB {
+func (repo *EventQueryRepository) querySort(db *gorm.DB, dto *eventDtos.EventQueryRequestDto) *gorm.DB {
 	sortableColumns := []string{
 		"title",
 		"start_date",
@@ -235,7 +235,7 @@ func (repo *EventQueryRepository) querySort(db *gorm.DB, dto *eventdtos.EventQue
 	return db.Order(sortBy + " " + order)
 }
 
-func (repo *EventQueryRepository) queryFilter(db *gorm.DB, dto *eventdtos.EventQueryRequestDto) *gorm.DB {
+func (repo *EventQueryRepository) queryFilter(db *gorm.DB, dto *eventDtos.EventQueryRequestDto) *gorm.DB {
 	if dto.CategoryId != nil {
 		db = db.Where("category_id = ?", *dto.CategoryId)
 	}

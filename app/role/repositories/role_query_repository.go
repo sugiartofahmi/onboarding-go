@@ -12,7 +12,7 @@ import (
 	"event-backend/infrastructure/enums"
 	"event-backend/infrastructure/exceptions"
 	"event-backend/infrastructure/utils"
-	roledtos "event-backend/presentation/http/role/dtos"
+	roleDtos "event-backend/app/role/dtos"
 )
 
 type RoleQueryRepository struct {
@@ -27,7 +27,7 @@ func NewRoleQueryRepository(db *gorm.DB) *RoleQueryRepository {
 	}
 }
 
-func (repo *RoleQueryRepository) Pagination(ctx context.Context, dto *roledtos.RoleQueryRequestDto) *infradtos.PaginationResultDto[entities.RoleEntity] {
+func (repo *RoleQueryRepository) Pagination(ctx context.Context, dto *roleDtos.RoleQueryRequestDto) *infradtos.PaginationResultDto[entities.RoleEntity] {
 	query := repo.roleModel.WithContext(ctx)
 	var results []*entities.RoleEntity
 	var total int64
@@ -130,14 +130,14 @@ func (repo *RoleQueryRepository) IsExistsByNameExcludeId(ctx context.Context, na
 	return exists
 }
 
-func (repo *RoleQueryRepository) querySearch(db *gorm.DB, dto *roledtos.RoleQueryRequestDto) *gorm.DB {
+func (repo *RoleQueryRepository) querySearch(db *gorm.DB, dto *roleDtos.RoleQueryRequestDto) *gorm.DB {
 	if dto.Search != "" {
 		db = db.Where("name ILIKE ?", "%"+dto.Search+"%")
 	}
 	return db
 }
 
-func (repo *RoleQueryRepository) querySort(db *gorm.DB, dto *roledtos.RoleQueryRequestDto) *gorm.DB {
+func (repo *RoleQueryRepository) querySort(db *gorm.DB, dto *roleDtos.RoleQueryRequestDto) *gorm.DB {
 	sortableColumns := []string{
 		"name",
 		"created_at",
