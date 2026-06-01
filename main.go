@@ -176,6 +176,7 @@ func initializeRouter() {
 		MaxAge:           12 * time.Hour,
 	}
 
+	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
 	router.Use(cors.New(corsConfig))
 	router.Use(middlewares.ExceptionMiddleware())
