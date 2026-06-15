@@ -57,4 +57,3 @@ func (s *UserSeeder) Handle(db *gorm.DB) error {
 	log.Printf("UserSeeder: inserted %d users", len(rows))
 	return nil
 }
-

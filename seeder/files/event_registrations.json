@@ -1,0 +1,56 @@
+[
+  {
+    "user_email": "attendee@event.com",
+    "event_slug": "go-rest-api-workshop",
+    "ticket_type": 1,
+    "status": 2
+  },
+  {
+    "user_email": "attendee@event.com",
+    "event_slug": "startup-fundraising-night",
+    "ticket_type": 1,
+    "status": 2
+  },
+  {
+    "user_email": "dina.attendee@event.com",
+    "event_slug": "startup-fundraising-night",
+    "ticket_type": 2,
+    "status": 1
+  },
+  {
+    "user_email": "attendee@event.com",
+    "event_slug": "healthy-living-community-run",
+    "ticket_type": 3,
+    "status": 1
+  },
+  {
+    "user_email": "raka.attendee@event.com",
+    "event_slug": "healthy-living-community-run",
+    "ticket_type": 1,
+    "status": 2
+  },
+  {
+    "user_email": "dina.attendee@event.com",
+    "event_slug": "indie-music-weekend",
+    "ticket_type": 1,
+    "status": 2
+  },
+  {
+    "user_email": "organizer@event.com",
+    "event_slug": "food-market-festival",
+    "ticket_type": 2,
+    "status": 2
+  },
+  {
+    "user_email": "raka.attendee@event.com",
+    "event_slug": "food-market-festival",
+    "ticket_type": 1,
+    "status": 3
+  },
+  {
+    "user_email": "organizer@event.com",
+    "event_slug": "digital-art-exhibition",
+    "ticket_type": 1,
+    "status": 3
+  }
+]

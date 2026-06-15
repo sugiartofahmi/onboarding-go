@@ -1,5 +1,8 @@
 [
-    { "name": "Admin User",     "email": "admin@event.com",     "password": "password", "role_name": "admin" },
-    { "name": "Organizer User", "email": "organizer@event.com", "password": "password", "role_name": "organizer" },
-    { "name": "Attendee User",  "email": "attendee@event.com",  "password": "password", "role_name": "attendee" }
+    { "name": "Admin User", "email": "admin@event.com", "password": "Adm!n-8xQ2vR9mL4sT", "role_name": "admin" },
+    { "name": "Organizer User", "email": "organizer@event.com", "password": "Org#7nK3pZ6wY1cV", "role_name": "organizer" },
+    { "name": "Community Organizer", "email": "community.organizer@event.com", "password": "Com$5rH8tN2qX9bE", "role_name": "organizer" },
+    { "name": "Attendee User", "email": "attendee@event.com", "password": "Att@4mD7sJ1uP6zA", "role_name": "attendee" },
+    { "name": "Dina Attendee", "email": "dina.attendee@event.com", "password": "Din%9vB2kQ5eL8yM", "role_name": "attendee" },
+    { "name": "Raka Attendee", "email": "raka.attendee@event.com", "password": "Rak&3cF6nT0hW7xS", "role_name": "attendee" }
 ]
