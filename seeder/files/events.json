@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Go REST API Workshop",
+    "category_slug": "technology",
+    "organizer_email": "community.organizer@event.com",
+    "description": "Hands-on workshop for building REST APIs with Go, Gin, and GORM.",
+    "location": "Jakarta",
+    "start_date": "2026-07-10T09:00:00+07:00",
+    "end_date": "2026-07-10T17:00:00+07:00",
+    "status": 2
+  },
+  {
+    "title": "Startup Fundraising Night",
+    "category_slug": "business",
+    "organizer_email": "community.organizer@event.com",
+    "description": "Networking event for founders, investors, and operators.",
+    "location": "Bandung",
+    "start_date": "2026-07-18T18:00:00+07:00",
+    "end_date": "2026-07-18T21:00:00+07:00",
+    "status": 2
+  },
+  {
+    "title": "Healthy Living Community Run",
+    "category_slug": "health",
+    "organizer_email": "community.organizer@event.com",
+    "description": "Community running event with health education booths.",
+    "location": "Surabaya",
+    "start_date": "2026-08-02T06:00:00+07:00",
+    "end_date": "2026-08-02T10:00:00+07:00",
+    "status": 2
+  },
+  {
+    "title": "Indie Music Weekend",
+    "category_slug": "music",
+    "organizer_email": "organizer@event.com",
+    "description": "Weekend showcase for local independent musicians.",
+    "location": "Yogyakarta",
+    "start_date": "2026-08-15T16:00:00+07:00",
+    "end_date": "2026-08-15T23:00:00+07:00",
+    "status": 1
+  },
+  {
+    "title": "Food Market Festival",
+    "category_slug": "food-drink",
+    "organizer_email": "organizer@event.com",
+    "description": "Curated food market featuring local culinary brands.",
+    "location": "Jakarta",
+    "start_date": "2026-06-20T10:00:00+07:00",
+    "end_date": "2026-06-20T22:00:00+07:00",
+    "status": 4
+  },
+  {
+    "title": "Digital Art Exhibition",
+    "category_slug": "arts",
+    "organizer_email": "organizer@event.com",
+    "description": "Digital art exhibition and creator talk.",
+    "location": "Bali",
+    "start_date": "2026-09-05T13:00:00+07:00",
+    "end_date": "2026-09-05T18:00:00+07:00",
+    "status": 3
+  }
+]
